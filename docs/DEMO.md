@@ -33,7 +33,9 @@ If the page is slow: free Render cold start — wait 30–60s, refresh once.
 ### 5. Proof (45s)
 - **Export audit JSON**, or  
 - **Observability spans**, or  
-- **Run Clearance Bench** / mention [evals/REPORT.md](../evals/REPORT.md)  
+- **Bench honesty:** [evals/REPORT.md](../evals/REPORT.md) — synthetic ~97.5%; SROIE **assisted** ~98% vs **hard OCR-only** ~79.5%; pipeline ~52% STP / ~48% HITL  
+
+> “We publish the hard track on purpose — high scores without a caveat are a red flag.”
 
 ### 6. Close (15s)
 > “Code is open source; demo is live. Stack is what AI application teams hire for: agents, tools, evals, governance.”
