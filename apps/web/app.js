@@ -62,14 +62,10 @@ async function boot() {
   );
   demoMode = !!status.demo_mode;
 
-  // Open access (no CLEARANCE_PASSWORD): no login screen, no logout
+  // Open access: no login gate — set password in Settings if you want one
   if (!authRequired) {
     showLogin(false);
     $("#btnLogout").classList.add("hidden");
-    const badge = $("#modeBadge");
-    if (badge && !badge.dataset.authNote) {
-      badge.dataset.authNote = "1";
-    }
     await finishBoot("open");
     return;
   }
@@ -78,7 +74,11 @@ async function boot() {
   if (!me.logged_in) {
     showLogin(true);
     $("#btnLogout").classList.add("hidden");
-    $("#loginHint").textContent = "Enter the workspace password (CLEARANCE_PASSWORD).";
+    $("#loginTitle").textContent = "Sign in to your AP workspace";
+    $("#loginHint").textContent =
+      status.password_source === "database"
+        ? "Enter the workspace password you set in Settings."
+        : "Enter your workspace password.";
     wireLoginOnce();
     return;
   }
@@ -123,6 +123,7 @@ async function finishBoot(authMode) {
       loadSettings();
     });
     $("#btnSaveSettings").addEventListener("click", saveSettings);
+    $("#btnSetPassword").addEventListener("click", setWorkspacePassword);
     $("#btnLogout").addEventListener("click", doLogout);
     $("#caseSearch").addEventListener("input", (e) => {
       filterQ = e.target.value.trim();
@@ -542,6 +543,55 @@ async function loadSettings() {
   $("#setConf").value = s.confidence_hitl_threshold;
   $("#setCurr").value = (s.allowed_currencies || []).join(", ");
   $("#companyTag").textContent = s.company_name || "AP document operations";
+  try {
+    const st = await fetch("/api/auth/status", { credentials: "include" }).then((r) => r.json());
+    if (st.can_setup_in_ui) {
+      $("#pwHint").textContent =
+        "No password yet (Render env not seen). Set one here — then login will be required.";
+    } else if (st.password_source === "env") {
+      $("#pwHint").textContent =
+        "Password is controlled by CLEARANCE_PASSWORD on the host (cannot change in UI).";
+    } else {
+      $("#pwHint").textContent = "Update your workspace password (you stay signed in).";
+    }
+  } catch {
+    /* ignore */
+  }
+}
+
+async function setWorkspacePassword() {
+  const password = ($("#setPassword").value || "").trim();
+  if (password.length < 4) {
+    toast("Password must be at least 4 characters");
+    return;
+  }
+  // Prefer setup when open; set-password when already protected / changing
+  let path = authRequired ? "/api/auth/set-password" : "/api/auth/setup";
+  let res = await fetch(path, {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ password }),
+  });
+  let body = await res.json().catch(() => ({}));
+  // If setup fails because already set, try set-password
+  if (!res.ok && path === "/api/auth/setup") {
+    res = await fetch("/api/auth/set-password", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password }),
+    });
+    body = await res.json().catch(() => ({}));
+  }
+  if (!res.ok || body.ok === false) {
+    toast(body.detail || "Could not set password");
+    return;
+  }
+  $("#setPassword").value = "";
+  toast(body.detail || "Password set");
+  authRequired = true;
+  await boot();
 }
 
 async function saveSettings() {

@@ -145,7 +145,9 @@ async def test_pdf_ingest_module():
 @pytest.mark.asyncio
 async def test_auth_login_when_password_set(monkeypatch):
     from app.config import settings
+    from app.workspace_auth import set_db_password_hash
 
+    set_db_password_hash("")
     monkeypatch.setattr(settings, "clearance_password", "secret-test")
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
@@ -156,7 +158,38 @@ async def test_auth_login_when_password_set(monkeypatch):
         ok = await client.post("/api/auth/login", json={"password": "secret-test"})
         assert ok.status_code == 200
         assert ok.json()["ok"] is True
-        # cookie set — httpx stores cookies
         allowed = await client.get("/api/cases")
         assert allowed.status_code == 200
     monkeypatch.setattr(settings, "clearance_password", "")
+    set_db_password_hash("")
+
+
+@pytest.mark.asyncio
+async def test_ui_setup_password_without_env():
+    """Workspace password via API (no CLEARANCE_PASSWORD) — Render-safe path."""
+    from app.config import settings
+    from app.workspace_auth import set_db_password_hash, auth_enabled
+
+    monkeypatch_pw = ""
+    # ensure open
+    object.__setattr__(settings, "clearance_password", "")
+    set_db_password_hash("")
+    assert not auth_enabled()
+
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        open_cases = await client.get("/api/cases")
+        assert open_cases.status_code == 200
+        setup = await client.post("/api/auth/setup", json={"password": "ui-pass-99"})
+        assert setup.status_code == 200
+        assert setup.json()["ok"] is True
+        assert auth_enabled()
+        # new client without cookie should be denied
+        async with AsyncClient(transport=transport, base_url="http://test") as client2:
+            denied = await client2.get("/api/cases")
+            assert denied.status_code == 401
+            login = await client2.post("/api/auth/login", json={"password": "ui-pass-99"})
+            assert login.status_code == 200
+            ok = await client2.get("/api/cases")
+            assert ok.status_code == 200
+    set_db_password_hash("")

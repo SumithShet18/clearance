@@ -65,6 +65,8 @@ class AppSettingsRow(Base):
     confidence_hitl_threshold: Mapped[float] = mapped_column(Float, default=0.85)
     allowed_currencies_json: Mapped[str] = mapped_column(Text, default='["USD"]')
     company_name: Mapped[str] = mapped_column(String(256), default="My Company")
+    # sha256 hex of workspace password (empty = open unless CLEARANCE_PASSWORD env)
+    workspace_password_hash: Mapped[str] = mapped_column(String(128), default="")
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 
 
@@ -75,15 +77,23 @@ SessionLocal = async_sessionmaker(engine, expire_on_commit=False)
 async def init_db() -> None:
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-        # lightweight migration for older DBs missing archived
-        try:
-            await conn.execute(
-                __import__("sqlalchemy").text(
-                    "ALTER TABLE cases ADD COLUMN archived INTEGER DEFAULT 0"
-                )
-            )
-        except Exception:  # noqa: BLE001 — column may already exist
-            pass
+        # lightweight migrations for older DBs
+        for stmt in (
+            "ALTER TABLE cases ADD COLUMN archived INTEGER DEFAULT 0",
+            "ALTER TABLE app_settings ADD COLUMN workspace_password_hash VARCHAR(128) DEFAULT ''",
+        ):
+            try:
+                await conn.execute(__import__("sqlalchemy").text(stmt))
+            except Exception:  # noqa: BLE001 — column may already exist
+                pass
+
+    # Load workspace password hash into memory for auth middleware
+    from app.workspace_auth import set_db_password_hash
+
+    async with SessionLocal() as session:
+        row = await session.get(AppSettingsRow, 1)
+        if row is not None:
+            set_db_password_hash(getattr(row, "workspace_password_hash", "") or "")
 
 
 async def get_session() -> AsyncSession:
@@ -168,6 +178,7 @@ async def get_or_create_settings(session: AsyncSession) -> AppSettingsRow:
         confidence_hitl_threshold=settings.confidence_hitl_threshold,
         allowed_currencies_json=json.dumps(["USD"]),
         company_name="My Company",
+        workspace_password_hash="",
         updated_at=now(),
     )
     session.add(row)

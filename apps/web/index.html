@@ -12,7 +12,7 @@
     <div class="login-card">
       <div class="logo">C</div>
       <h1>Clearance</h1>
-      <p class="tag">Sign in to your AP workspace</p>
+      <p class="tag" id="loginTitle">Sign in to your AP workspace</p>
       <input type="password" id="loginPassword" placeholder="Workspace password" autocomplete="current-password" />
       <button class="btn" id="btnLogin">Sign in</button>
       <p class="hint" id="loginHint"></p>
@@ -126,6 +126,15 @@
         </label>
       </div>
       <button class="btn" id="btnSaveSettings">Save settings</button>
+
+      <h3 class="sub">Workspace password</h3>
+      <p class="hint" id="pwHint">
+        Set a password here if Render env vars are not available. After this, the app requires login.
+      </p>
+      <label class="field">New password
+        <input id="setPassword" type="password" autocomplete="new-password" placeholder="min 4 characters" />
+      </label>
+      <button class="btn secondary" id="btnSetPassword" type="button">Set / update password</button>
     </div>
 
     <footer>
