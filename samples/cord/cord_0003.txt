@@ -1,0 +1,11 @@
+CORD Merchant
+Vendor: CORD Merchant
+Invoice Number: CORD-0003
+Invoice Date: 2020-01-01
+Currency: USD
+
+Line items:
+
+Subtotal: 28000.00
+Tax: 0.00
+Total: 28000.00

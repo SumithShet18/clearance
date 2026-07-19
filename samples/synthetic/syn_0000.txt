@@ -12,4 +12,4 @@ Line items:
 
 Subtotal: 10000.00
 Tax: 800.00
-Total: 10800.00
+T0tal approx: 10800.00

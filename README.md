@@ -9,6 +9,8 @@
 Portfolio project by [**SumithShet18**](https://github.com/SumithShet18)  
 **Repo:** [github.com/SumithShet18/clearance](https://github.com/SumithShet18/clearance)
 
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/SumithShet18/clearance)
+
 > Enterprise AI in 2026 fails on **quality, evals, and governance** — not model IQ.  
 > Clearance is a production-shaped **multi-agent document operations** system that turns invoices into audited ERP actions with confidence gates, policy checks, human-in-the-loop, and offline gold evals.
 
@@ -130,9 +132,24 @@ set PYTHONPATH=.
 apps\api\.venv\Scripts\python evals\run_benchmark.py --source synthetic --limit 50 --pipeline
 ```
 
-See published numbers in **[evals/REPORT.md](evals/REPORT.md)**.
+### Latest published numbers
 
-API: `GET /api/evals/benchmark?source=synthetic&limit=50` · UI button **Run Clearance Bench (50)**.
+See full tables in **[evals/REPORT.md](evals/REPORT.md)**.
+
+| Track | Cases | Micro field acc | Notes |
+| --- | ---: | ---: | --- |
+| **Synthetic** | 50 | **~97.5%** | Includes stress (noise / missing # / math drift) |
+| **Synthetic pipeline STP** | 25 | **~52% auto-act** | **~48% HITL** — governance path works |
+| **CORD v2 receipts** | 25 | **~100%** on GT text renders | Real public receipt labels (HF) |
+
+API: `GET /api/evals/benchmark?source=synthetic&limit=50` · UI **Run Clearance Bench (50)**.
+
+### Share / deploy
+
+1. **One-click Render:** button above (free tier, mock mode).  
+2. **Local:** `uvicorn` as above.  
+3. **Loom (add your link):** seed → HITL → bench → audit export (3–5 min).  
+4. **Pin this repo** on your GitHub profile.
 
 ## Tests
 

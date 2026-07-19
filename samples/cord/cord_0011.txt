@@ -1,0 +1,15 @@
+CORD Merchant
+Vendor: CORD Merchant
+Invoice Number: CORD-0011
+Invoice Date: 2020-01-01
+Currency: USD
+
+Line items:
+- Se'I Sapi Sambal Matah ( R ) | 1.0 | 20.00 | 20.00
+- Se'I Sapi Lada Hitam (J) | 1.0 | 35.00 | 35.00
+- Nasi Putih | 2.0 | 10.00 | 10.00
+- Milk Shake Coklat | 1.0 | 16.00 | 16.00
+
+Subtotal: 89.10
+Tax: 0.00
+Total: 89.10

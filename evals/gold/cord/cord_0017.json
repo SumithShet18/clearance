@@ -1,0 +1,13 @@
+{
+  "sample": "cord/cord_0017.txt",
+  "expected": {
+    "vendor_name": "CORD Merchant",
+    "invoice_number": "CORD-0017",
+    "invoice_date": "2020-01-01",
+    "currency": "USD",
+    "total": 20000.0,
+    "line_items": []
+  },
+  "id": "cord-0017",
+  "source": "cord"
+}

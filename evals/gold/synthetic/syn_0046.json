@@ -14,6 +14,7 @@
   "source": "synthetic",
   "meta": {
     "known_vendor": false,
-    "tag": ""
+    "tag": "",
+    "stress": "math_drift"
   }
 }

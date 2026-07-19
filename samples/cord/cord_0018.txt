@@ -1,0 +1,13 @@
+CORD Merchant
+Vendor: CORD Merchant
+Invoice Number: CORD-0018
+Invoice Date: 2020-01-01
+Currency: USD
+
+Line items:
+- beef C roll 3pcs | 1.0 | 10000.00 | 10000.00
+- kaya bred | 1.0 | 15000.00 | 15000.00
+
+Subtotal: 25000.00
+Tax: 0.00
+Total: 25000.00

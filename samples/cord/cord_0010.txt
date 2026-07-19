@@ -1,0 +1,13 @@
+CORD Merchant
+Vendor: CORD Merchant
+Invoice Number: CORD-0010
+Invoice Date: 2020-01-01
+Currency: USD
+
+Line items:
+- Serbu 1 | 2.0 | 40.00 | 40.00
+- Choco Peanut Bread | 2.0 | 20.00 | 20.00
+
+Subtotal: 60.00
+Tax: 0.00
+Total: 60.00

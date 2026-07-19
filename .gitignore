@@ -24,6 +24,8 @@ data/clearance.db
 samples/cord/*.png
 evals/results/latest.json
 .pytest_cache/
+# keep samples/cord/*.txt and evals/gold/cord/*.json committed as fixtures
+
 
 # IDE / OS
 .DS_Store

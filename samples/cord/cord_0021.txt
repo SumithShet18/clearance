@@ -1,0 +1,15 @@
+CORD Merchant
+Vendor: CORD Merchant
+Invoice Number: CORD-0021
+Invoice Date: 2020-01-01
+Currency: USD
+
+Line items:
+- Mango Lemon Tea | 1.0 | 29090.00 | 29090.00
+- Sliders Set | 1.0 | 113636.00 | 113636.00
+- Chicken Vege Rice Bowl | 1.0 | 86363.00 | 86363.00
+- Discount BCA 15% | 1.0 | 34363.00 | 34363.00
+
+Subtotal: 224908.00
+Tax: 0.00
+Total: 224908.00

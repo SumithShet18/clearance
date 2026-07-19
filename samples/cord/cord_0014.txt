@@ -1,0 +1,13 @@
+CORD Merchant
+Vendor: CORD Merchant
+Invoice Number: CORD-0014
+Invoice Date: 2020-01-01
+Currency: USD
+
+Line items:
+- Arem Arem | 1.0 | 24.00 | 24.00
+- Kroket | 1.0 | 12.00 | 12.00
+
+Subtotal: 39.60
+Tax: 0.00
+Total: 39.60

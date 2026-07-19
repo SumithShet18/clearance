@@ -1,0 +1,13 @@
+CORD Merchant
+Vendor: CORD Merchant
+Invoice Number: CORD-0020
+Invoice Date: 2020-01-01
+Currency: USD
+
+Line items:
+- JAMUR | 2.0 | 10000.00 | 10000.00
+- TAHU | 1.0 | 5000.00 | 5000.00
+
+Subtotal: 16500.00
+Tax: 0.00
+Total: 16500.00

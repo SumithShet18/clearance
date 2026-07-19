@@ -104,8 +104,24 @@ def generate_corpus(n: int = 50, seed: int = 42) -> list[GoldInvoice]:
         ]
         if "LOWCONF" in tag:
             body_lines.insert(0, "LOWCONF SAMPLE — partial OCR noise")
-            # slightly mess vendor line for realism while gold stays clean
-            body_lines[1] = vendor  # still parseable via Vendor: line
+            body_lines[1] = vendor
+
+        # Stress modes: intentional noise / gaps (honest <100% extract track)
+        stress = ""
+        if i % 17 == 0:
+            stress = "noise"
+            # corrupt Total line formatting (extractor may still recover)
+            body_lines = [ln.replace("Total:", "T0tal approx:") if ln.startswith("Total:") else ln for ln in body_lines]
+        elif i % 19 == 0:
+            stress = "missing_invoice_no"
+            body_lines = [ln for ln in body_lines if not ln.startswith("Invoice Number:")]
+            inv_no = ""  # gold reflects missing → skip strict inv match via empty gold number
+        elif i % 23 == 0:
+            stress = "math_drift"
+            # gold keeps true total; document shows drifted total
+            body_lines = [
+                (f"Total: {total + 12.34:.2f}" if ln.startswith("Total:") else ln) for ln in body_lines
+            ]
 
         fname = f"syn_{i:04d}.txt"
         rel = f"samples/synthetic/{fname}"
@@ -122,7 +138,7 @@ def generate_corpus(n: int = 50, seed: int = 42) -> list[GoldInvoice]:
             currency=currency,
             tax=tax,
             subtotal=subtotal,
-            meta={"known_vendor": known, "tag": tag},
+            meta={"known_vendor": known, "tag": tag, "stress": stress},
         )
         gold_path = gold_dir / f"syn_{i:04d}.json"
         gold_path.write_text(

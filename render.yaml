@@ -1,0 +1,13 @@
+# Deploy: https://render.com/deploy?repo=https://github.com/SumithShet18/clearance
+services:
+  - type: web
+    name: clearance
+    runtime: python
+    plan: free
+    buildCommand: pip install -r apps/api/requirements.txt
+    startCommand: cd apps/api && uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: CLEARANCE_MODE
+        value: mock
+      - key: PYTHON_VERSION
+        value: "3.12.0"

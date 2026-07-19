@@ -1,0 +1,13 @@
+CORD Merchant
+Vendor: CORD Merchant
+Invoice Number: CORD-0013
+Invoice Date: 2020-01-01
+Currency: USD
+
+Line items:
+- MINERAL 600 ML | 1.0 | 7727.00 | 7727.00
+- BULGOGI RICE R | 1.0 | 33636.00 | 33636.00
+
+Subtotal: 45500.00
+Tax: 0.00
+Total: 45500.00

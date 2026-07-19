@@ -13,64 +13,64 @@ def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
 
-def _parse_total(gt: dict) -> float:
-    """Best-effort total from CORD gt_parse structures."""
-    # common shapes: menu items + total.total_price, or total dict
-    total = gt.get("total") or {}
-    if isinstance(total, dict):
-        for key in ("total_price", "total", "cashprice", "changeprice"):
-            if key in total and total[key] is not None:
-                return _money(total[key])
-    # nested list style
-    if isinstance(gt.get("total"), list):
-        for row in gt["total"]:
-            if isinstance(row, dict) and "total_price" in row:
-                return _money(row["total_price"])
-    # flat
-    for key in ("total_price", "total"):
-        if key in gt:
-            return _money(gt[key])
-    return 0.0
-
-
 def _money(v) -> float:
     if v is None:
         return 0.0
     if isinstance(v, (int, float)):
         return float(v)
-    s = re.sub(r"[^\d.]", "", str(v).replace(",", ""))
+    s = str(v).strip()
+    # European / Asian thousand separators
+    if "," in s and "." in s:
+        if s.rfind(",") > s.rfind("."):
+            s = s.replace(".", "").replace(",", ".")
+        else:
+            s = s.replace(",", "")
+    else:
+        s = s.replace(",", "")
+    s = re.sub(r"[^\d.]", "", s)
     try:
         return float(s) if s else 0.0
     except ValueError:
         return 0.0
 
 
+def _parse_total(gt: dict) -> float:
+    total = gt.get("total") or {}
+    if isinstance(total, dict):
+        for key in ("total_price", "total", "cashprice", "creditcardprice", "emoneyprice"):
+            if key in total and total[key] is not None:
+                return _money(total[key])
+    if isinstance(total, list):
+        for row in total:
+            if isinstance(row, dict) and "total_price" in row:
+                return _money(row["total_price"])
+    return 0.0
+
+
 def _vendor(gt: dict) -> str:
-    menu = gt.get("menu")
-    # CORD often has nm under store / menu header
     for key in ("store", "store_nm", "nm"):
-        if key in gt and isinstance(gt[key], str):
-            return gt[key]
-    if isinstance(gt.get("store"), dict):
+        if key in gt and isinstance(gt[key], str) and gt[key].strip():
+            return gt[key].strip()
+    store = gt.get("store")
+    if isinstance(store, dict):
         for k in ("nm", "name", "store_nm"):
-            if k in gt["store"]:
-                return str(gt["store"][k])
-    # fallback from first menu item category
-    return str(gt.get("store_nm") or gt.get("company") or "Unknown Merchant")
+            if store.get(k):
+                return str(store[k]).strip()
+    # CORD often omits store name in gt_parse — use stable placeholder
+    return "CORD Merchant"
 
 
 def _date(gt: dict) -> str:
     for key in ("date", "sub_total"):
         block = gt.get(key)
-        if isinstance(block, dict) and "date" in block:
+        if isinstance(block, dict) and block.get("date"):
             return str(block["date"])
         if key == "date" and isinstance(block, str):
             return block
-    return ""
+    return "2020-01-01"
 
 
 def cord_to_text(gt: dict, image_id: str) -> str:
-    """Render a parseable text invoice-like document from CORD ground truth."""
     vendor = _vendor(gt)
     total = _parse_total(gt)
     date = _date(gt)
@@ -78,7 +78,7 @@ def cord_to_text(gt: dict, image_id: str) -> str:
         vendor,
         f"Vendor: {vendor}",
         f"Invoice Number: CORD-{image_id}",
-        f"Invoice Date: {date}" if date else "Invoice Date: 2020-01-01",
+        f"Invoice Date: {date}",
         "Currency: USD",
         "",
         "Line items:",
@@ -92,17 +92,11 @@ def cord_to_text(gt: dict, image_id: str) -> str:
             price = _money(item.get("price") or item.get("unitprice") or 0)
             qty = item.get("cnt") or item.get("num") or 1
             try:
-                qty_f = float(qty)
+                qty_f = float(str(qty).replace(",", ""))
             except (TypeError, ValueError):
                 qty_f = 1.0
-            amt = price if price else 0.0
-            lines.append(f"- {name} | {qty_f} | {amt:.2f} | {amt:.2f}")
-    if total <= 0 and len(lines) > 6:
-        # sum line amounts
-        pass
-    subtotal = total
-    tax = 0.0
-    lines += ["", f"Subtotal: {subtotal:.2f}", f"Tax: {tax:.2f}", f"Total: {total:.2f}"]
+            lines.append(f"- {name} | {qty_f} | {price:.2f} | {price:.2f}")
+    lines += ["", f"Subtotal: {total:.2f}", "Tax: 0.00", f"Total: {total:.2f}"]
     return "\n".join(lines) + "\n"
 
 
@@ -116,19 +110,22 @@ def load_cord(
     Writes text renders under samples/cord/ for the extractor.
     Returns [] if datasets package or network unavailable.
     """
-    try:
-        from datasets import load_dataset  # type: ignore
-    except ImportError:
-        return []
-
     root = _repo_root()
-    out_dir = root / "samples" / "cord"
     gold_dir = root / "evals" / "gold" / "cord"
     if cache and gold_dir.exists() and list(gold_dir.glob("*.json")):
         return _load_cached(gold_dir, limit)
 
     try:
+        from datasets import load_dataset  # type: ignore
+    except ImportError:
+        return []
+
+    out_dir = root / "samples" / "cord"
+    try:
         ds = load_dataset("naver-clova-ix/cord-v2", split=split)
+        # Avoid requiring Pillow for image decode when we only need ground_truth
+        if "image" in ds.column_names:
+            ds = ds.remove_columns(["image"])
     except Exception:
         return []
 
@@ -137,10 +134,9 @@ def load_cord(
     golds: list[GoldInvoice] = []
 
     for i, row in enumerate(ds):
-        if i >= limit:
+        if len(golds) >= limit:
             break
-        # ground_truth may be string JSON
-        gt_raw = row.get("ground_truth") or row.get("gt_parse") or "{}"
+        gt_raw = row.get("ground_truth") or "{}"
         if isinstance(gt_raw, str):
             try:
                 gt_wrap = json.loads(gt_raw)
@@ -148,22 +144,22 @@ def load_cord(
                 continue
         else:
             gt_wrap = gt_raw
-        gt = gt_wrap.get("gt_parse") if isinstance(gt_wrap, dict) and "gt_parse" in gt_wrap else gt_wrap
+        gt = (
+            gt_wrap.get("gt_parse")
+            if isinstance(gt_wrap, dict) and "gt_parse" in gt_wrap
+            else gt_wrap
+        )
         if not isinstance(gt, dict):
             continue
 
         image_id = f"{i:04d}"
+        total = _parse_total(gt)
+        if total <= 0:
+            continue
+
         text = cord_to_text(gt, image_id)
         rel_sample = f"samples/cord/cord_{image_id}.txt"
         (out_dir / f"cord_{image_id}.txt").write_text(text, encoding="utf-8")
-
-        # also keep image if present
-        img = row.get("image")
-        if img is not None and hasattr(img, "save"):
-            try:
-                img.save(out_dir / f"cord_{image_id}.png")
-            except Exception:
-                pass
 
         gold = GoldInvoice(
             id=f"cord-{image_id}",
@@ -171,13 +167,11 @@ def load_cord(
             sample_path=rel_sample,
             vendor_name=_vendor(gt),
             invoice_number=f"CORD-{image_id}",
-            invoice_date=_date(gt) or "2020-01-01",
-            total=_parse_total(gt),
+            invoice_date=_date(gt),
+            total=total,
             currency="USD",
             meta={"split": split},
         )
-        if gold.total <= 0:
-            continue
         (gold_dir / f"cord_{image_id}.json").write_text(
             json.dumps(
                 {

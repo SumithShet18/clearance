@@ -1,0 +1,14 @@
+CORD Merchant
+Vendor: CORD Merchant
+Invoice Number: CORD-0006
+Invoice Date: 2020-01-01
+Currency: USD
+
+Line items:
+- POTATO SAUSAGE BREAD | 1.0 | 19000.00 | 19000.00
+- OREO GREEN TEA SPREAD | 1.0 | 52000.00 | 52000.00
+- WHITE CHOCO BANANA SPREAD | 1.0 | 52000.00 | 52000.00
+
+Subtotal: 123000.00
+Tax: 0.00
+Total: 123000.00

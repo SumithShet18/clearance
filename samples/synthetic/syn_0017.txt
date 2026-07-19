@@ -11,4 +11,4 @@ Line items:
 
 Subtotal: 6367.35
 Tax: 509.39
-Total: 6876.74
+T0tal approx: 6876.74

@@ -1,0 +1,13 @@
+CORD Merchant
+Vendor: CORD Merchant
+Invoice Number: CORD-0015
+Invoice Date: 2020-01-01
+Currency: USD
+
+Line items:
+- Arem Arem | 2.0 | 24.00 | 24.00
+- Pepenero Pastel | 2.0 | 30.00 | 30.00
+
+Subtotal: 59.40
+Tax: 0.00
+Total: 59.40

@@ -1,0 +1,13 @@
+CORD Merchant
+Vendor: CORD Merchant
+Invoice Number: CORD-0008
+Invoice Date: 2020-01-01
+Currency: USD
+
+Line items:
+- TALAM UNGU | 1.0 | 19500.00 | 19500.00
+- MIKA KECIL | 1.0 | 0.00 | 0.00
+
+Subtotal: 11700.00
+Tax: 0.00
+Total: 11700.00

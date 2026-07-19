@@ -1,0 +1,14 @@
+CORD Merchant
+Vendor: CORD Merchant
+Invoice Number: CORD-0019
+Invoice Date: 2020-01-01
+Currency: USD
+
+Line items:
+- FUTAMI 17 GREEN TEA (CLAS | 1.0 | 12500.00 | 12500.00
+- EGG TART | 1.0 | 13000.00 | 13000.00
+- GRAIN CROQUE MONSIEUR | 1.0 | 17000.00 | 17000.00
+
+Subtotal: 42500.00
+Tax: 0.00
+Total: 42500.00
