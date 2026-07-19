@@ -172,7 +172,9 @@ API: `GET /api/evals/benchmark?source=synthetic&limit=50` · UI **Run Clearance 
 1. **Live:** https://clearance-1k8l.onrender.com  
 2. **Pin this repo** on your GitHub profile.  
 3. **Loom (3–5 min):** live seed → HITL → bench → audit export.  
-4. **LinkedIn:** link live demo + dual-track bench metrics from [evals/REPORT.md](evals/REPORT.md).
+4. **LinkedIn:** link live demo + dual-track bench metrics from [evals/REPORT.md](evals/REPORT.md).  
+
+Full checklist + copy-paste post/resume: **[docs/SHARE_KIT.md](docs/SHARE_KIT.md)**.
 
 ## Tests
 
