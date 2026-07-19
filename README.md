@@ -13,6 +13,15 @@ Portfolio project by [**SumithShet18**](https://github.com/SumithShet18)
 
 **v0.4** adds JSONL agent traces, image upload (vision when API key set), and a **claims FNOL** sample pack.
 
+### Free HTTPS deploy (Render)
+
+1. Click **Deploy to Render** above (or open [this link](https://render.com/deploy?repo=https://github.com/SumithShet18/clearance)).
+2. Sign in with GitHub → **Apply** Blueprint (Docker, free plan).
+3. After build: open `https://clearance-….onrender.com` → **One-click demo seed**.
+
+Details: [scripts/deploy-render.md](scripts/deploy-render.md).  
+`render.yaml` uses **Docker** so `samples/` + `evals/` ship with the image.
+
 > Enterprise AI in 2026 fails on **quality, evals, and governance** — not model IQ.  
 > Clearance is a production-shaped **multi-agent document operations** system that turns invoices into audited ERP actions with confidence gates, policy checks, human-in-the-loop, and offline gold evals.
 

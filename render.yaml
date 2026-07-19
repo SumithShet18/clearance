@@ -1,13 +1,19 @@
-# Deploy: https://render.com/deploy?repo=https://github.com/SumithShet18/clearance
+# Blueprint: https://dashboard.render.com/blueprints
+# One-click: https://render.com/deploy?repo=https://github.com/SumithShet18/clearance
+#
+# Docker deploy is the most reliable path for this monorepo (samples + evals + API).
+
 services:
   - type: web
     name: clearance
-    runtime: python
+    runtime: docker
     plan: free
-    buildCommand: pip install -r apps/api/requirements.txt
-    startCommand: cd apps/api && uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    region: oregon
+    healthCheckPath: /api/health
     envVars:
       - key: CLEARANCE_MODE
         value: mock
-      - key: PYTHON_VERSION
-        value: "3.12.0"
+      - key: PORT
+        value: "8000"
