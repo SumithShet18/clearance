@@ -28,10 +28,21 @@ from app.models.schemas import (
 from app.services.erp import create_bill, flag_anomaly
 from app.services.extractor import extract_invoice
 from app.services.policy import apply_policy, retrieve_policies
+from app.services.traces import emit_span
 
 
-def _step(name: str, status: str, detail: str = "", data: dict | None = None, tokens: int = 0, cost: float = 0.0) -> AgentStep:
+def _step(
+    name: str,
+    status: str,
+    detail: str = "",
+    data: dict | None = None,
+    tokens: int = 0,
+    cost: float = 0.0,
+    case_id: str | None = None,
+) -> AgentStep:
     t = datetime.now(timezone.utc)
+    if case_id:
+        emit_span(case_id, name, status, detail, data, tokens, cost)
     return AgentStep(
         name=name,
         status=status,
@@ -130,8 +141,19 @@ async def run_pipeline(session: AsyncSession, case: CaseRow) -> CaseRow:
     case.status = CaseStatus.running.value
     case.updated_at = now()
 
+    cid = case.id
+    doc_kind = "claim" if "claim" in (case.filename or "").lower() else "invoice"
+
     # 1. Ingest
-    steps.append(_step("ingest", "completed", f"Loaded {case.filename}", {"chars": len(case.content_text)}))
+    steps.append(
+        _step(
+            "ingest",
+            "completed",
+            f"Loaded {case.filename}",
+            {"chars": len(case.content_text), "kind": doc_kind},
+            case_id=cid,
+        )
+    )
     audit.append({"event": "ingest", "filename": case.filename, "at": now().isoformat()})
 
     # 2. Plan (task ledger)
@@ -140,15 +162,20 @@ async def run_pipeline(session: AsyncSession, case: CaseRow) -> CaseRow:
             f"Document filename: {case.filename}",
             f"Content length: {len(case.content_text)} chars",
             f"Mode: {'llm' if settings.use_llm else 'mock'}",
+            f"Kind: {doc_kind}",
         ],
-        guesses=["Document type is supplier invoice (AP)"],
+        guesses=[
+            "Document type is insurance claim FNOL"
+            if doc_kind == "claim"
+            else "Document type is supplier invoice (AP)"
+        ],
         plan=[
-            "Extract structured invoice fields",
+            "Extract structured fields",
             "Validate schema and arithmetic",
             "Retrieve applicable policies",
             "Decide approve/hold/escalate",
             "Human review if needed",
-            "Write bill to ERP via tool",
+            "Write bill / open claim case via tool",
             "Verify final state",
         ],
         risk_tier="medium",
@@ -160,6 +187,7 @@ async def run_pipeline(session: AsyncSession, case: CaseRow) -> CaseRow:
             "completed",
             "Built task ledger (Magentic-One style)",
             task_ledger.model_dump(),
+            case_id=cid,
         )
     )
 
@@ -178,6 +206,7 @@ async def run_pipeline(session: AsyncSession, case: CaseRow) -> CaseRow:
             {"mode": meta.get("mode"), "extraction": extraction.model_dump()},
             tokens=int(meta.get("tokens", 0)),
             cost=float(meta.get("cost_usd", 0)),
+            case_id=cid,
         )
     )
     progress.completed_steps.append("extract")
@@ -191,6 +220,7 @@ async def run_pipeline(session: AsyncSession, case: CaseRow) -> CaseRow:
             "completed",
             "ok" if validation.ok else f"{len(validation.issues)} issue(s)",
             validation.model_dump(),
+            case_id=cid,
         )
     )
     progress.completed_steps.append("validate")
@@ -206,6 +236,7 @@ async def run_pipeline(session: AsyncSession, case: CaseRow) -> CaseRow:
             "completed",
             f"Retrieved {len(policies)} policy snippet(s)",
             {"policies": policies},
+            case_id=cid,
         )
     )
     progress.completed_steps.append("retrieve_policy")
@@ -213,7 +244,15 @@ async def run_pipeline(session: AsyncSession, case: CaseRow) -> CaseRow:
 
     # 6. Decide
     decision, reason, needs_human = decide(extraction, validation, conf)
-    steps.append(_step("decide", "completed", f"{decision.value}: {reason}", {"decision": decision.value}))
+    steps.append(
+        _step(
+            "decide",
+            "completed",
+            f"{decision.value}: {reason}",
+            {"decision": decision.value},
+            case_id=cid,
+        )
+    )
     progress.completed_steps.append("decide")
 
     case.extraction_json = dumps(extraction)
@@ -238,11 +277,14 @@ async def run_pipeline(session: AsyncSession, case: CaseRow) -> CaseRow:
                 "completed",
                 f"Anomaly {anomaly['id']} recorded",
                 {"tool": "erp_flag_anomaly", "anomaly": anomaly},
+                case_id=cid,
             )
         )
-        steps.append(_step("hitl", "waiting", reason))
-        steps.append(_step("act", "skipped", "Waiting for human approval before ERP writeback"))
-        steps.append(_step("verify", "skipped", "Pending HITL"))
+        steps.append(_step("hitl", "waiting", reason, case_id=cid))
+        steps.append(
+            _step("act", "skipped", "Waiting for human approval before ERP writeback", case_id=cid)
+        )
+        steps.append(_step("verify", "skipped", "Pending HITL", case_id=cid))
         case.status = CaseStatus.needs_review.value
         case.progress_ledger_json = dumps(progress)
         case.steps_json = dumps(steps)
@@ -256,7 +298,6 @@ async def run_pipeline(session: AsyncSession, case: CaseRow) -> CaseRow:
         case.updated_at = now()
         await session.commit()
         return case
-
 
     # 7. Act (MCP-shaped ERP tool) — irreversible gate passed
     progress.current_step = "act"
@@ -273,6 +314,7 @@ async def run_pipeline(session: AsyncSession, case: CaseRow) -> CaseRow:
             "completed",
             f"ERP bill created {bill.id}",
             {"tool": "erp_create_bill", "bill": bill.__dict__},
+            case_id=cid,
         )
     )
     progress.completed_steps.append("act")
@@ -295,6 +337,7 @@ async def run_pipeline(session: AsyncSession, case: CaseRow) -> CaseRow:
             "completed" if verify_ok else "failed",
             "Final state verified" if verify_ok else "Verification failed",
             {"erp_bill_id": case.erp_bill_id, "decision": decision.value},
+            case_id=cid,
         )
     )
     progress.completed_steps.append("verify")

@@ -129,7 +129,9 @@ async function refreshCases() {
 }
 
 async function runSample(name) {
-  const created = await api(`/api/cases/from-sample/${encodeURIComponent(name)}`, { method: "POST" });
+  const created = await api(`/api/cases/from-sample/${name.split("/").map(encodeURIComponent).join("/")}`, {
+    method: "POST",
+  });
   selectedId = created.id;
   toast(`${name} → ${created.status}`);
   await Promise.all([refreshCases(), refreshMetrics(), selectCase(created.id)]);
@@ -217,6 +219,9 @@ async function selectCase(id) {
         </div>
       </div>` : ""}
 
+    <h3 class="sub">Observability spans</h3>
+    <pre class="audit" id="traceBox">Loading traces…</pre>
+
     <h3 class="sub">Audit log</h3>
     <pre class="audit">${escapeHtml(JSON.stringify(c.audit || [], null, 2))}</pre>
 
@@ -228,6 +233,25 @@ async function selectCase(id) {
   if (needsReview) {
     $("#btnApprove").onclick = () => review(id, "approve");
     $("#btnReject").onclick = () => review(id, "reject");
+  }
+  loadTraces(id);
+}
+
+async function loadTraces(id) {
+  try {
+    const t = await api(`/api/cases/${id}/traces`);
+    const box = $("#traceBox");
+    if (!box) return;
+    if (!t.spans?.length) {
+      box.textContent = "No spans yet.";
+      return;
+    }
+    box.textContent = t.spans
+      .map((s) => `${s.ts}  ${s.name.padEnd(16)} ${s.status.padEnd(10)} ${s.detail || ""}`)
+      .join("\n");
+  } catch {
+    const box = $("#traceBox");
+    if (box) box.textContent = "Traces unavailable.";
   }
 }
 

@@ -126,21 +126,38 @@ async def create_case(
 ):
     raw = await file.read()
     filename = file.filename or "upload.txt"
-    try:
-        text = raw.decode("utf-8")
-    except UnicodeDecodeError:
-        text = raw.decode("latin-1", errors="replace")
-        if filename.lower().endswith(".pdf"):
-            text = (
-                f"[Binary PDF upload: {filename}]\n"
-                "Clearance Phase-1 demo reads text invoices best. "
-                "Paste sample .txt invoices from /samples for full pipeline.\n"
-                + text[:500]
-            )
-
     case_id = new_id()
     dest = Path(settings.upload_dir) / f"{case_id}_{filename}"
     dest.write_bytes(raw)
+
+    lower = filename.lower()
+    is_image = lower.endswith((".png", ".jpg", ".jpeg", ".webp", ".gif"))
+    if is_image:
+        from app.services.extractor import extract_from_image
+
+        ext, meta = extract_from_image(str(dest), filename)
+        # Seed content_text from extraction so pipeline re-extracts consistently in mock
+        text = (
+            f"Vendor: {ext.vendor_name}\n"
+            f"Invoice Number: {ext.invoice_number}\n"
+            f"Invoice Date: {ext.invoice_date}\n"
+            f"Currency: {ext.currency}\n"
+            f"Subtotal: {ext.subtotal:.2f}\n"
+            f"Tax: {ext.tax:.2f}\n"
+            f"Total: {ext.total:.2f}\n"
+            f"# vision_meta={meta.get('mode')}\n"
+        )
+    else:
+        try:
+            text = raw.decode("utf-8")
+        except UnicodeDecodeError:
+            text = raw.decode("latin-1", errors="replace")
+            if lower.endswith(".pdf"):
+                text = (
+                    f"[Binary PDF upload: {filename}]\n"
+                    "Prefer .txt samples or image upload with CLEARANCE_MODE=llm.\n"
+                    + text[:500]
+                )
 
     row = CaseRow(
         id=case_id,
@@ -160,11 +177,11 @@ async def create_case(
     return CaseCreateResponse(id=row.id, status=CaseStatus(row.status), filename=row.filename)
 
 
-@router.post("/from-sample/{sample_name}", response_model=CaseCreateResponse)
+@router.post("/from-sample/{sample_name:path}", response_model=CaseCreateResponse)
 async def create_from_sample(sample_name: str, session: AsyncSession = Depends(get_session)):
     root = Path(__file__).resolve().parents[4] / "samples"
-    path = root / sample_name
-    if not path.exists():
+    path = (root / sample_name).resolve()
+    if not str(path).startswith(str(root.resolve())) or not path.exists():
         raise HTTPException(404, f"Sample not found: {sample_name}")
     text = path.read_text(encoding="utf-8")
     case_id = new_id()
@@ -200,6 +217,18 @@ async def review_case(
     row = await apply_review(session, row, body.action, body.extraction, body.note)
     await session.refresh(row)
     return _row_to_detail(row)
+
+
+@router.get("/{case_id}/traces")
+async def case_traces(case_id: str, session: AsyncSession = Depends(get_session)):
+    """JSONL agent spans for observability demos."""
+    row = await get_case(session, case_id)
+    if not row:
+        raise HTTPException(404, "Case not found")
+    from app.services.traces import read_spans
+
+    spans = read_spans(case_id)
+    return {"case_id": case_id, "spans": spans, "count": len(spans)}
 
 
 @router.get("/{case_id}/export")

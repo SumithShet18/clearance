@@ -1,0 +1,21 @@
+First Notice of Loss — Property Claim
+Policyholder: Metro Retail LLC
+Policy Number: POL-PROP-22019
+Claim Number: CLM-2026-9007
+Loss Date: 2026-05-01
+Vendor: Quantum Parts LLC
+Currency: USD
+
+Incident: Water damage to inventory after pipe burst.
+Estimate reference: INV-RESTORATION-991
+
+Line items:
+- Emergency water extraction | 1 | 4200.00 | 4200.00
+- Inventory salvage | 1 | 6800.00 | 6800.00
+- Temporary repairs | 1 | 2500.00 | 2500.00
+
+Subtotal: 13500.00
+Tax: 1080.00
+Total: 14580.00
+
+Notes: New restoration vendor. Amount exceeds auto-approve threshold — escalate to senior adjuster.

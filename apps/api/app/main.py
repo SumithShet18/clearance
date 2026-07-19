@@ -27,9 +27,10 @@ app = FastAPI(
         "Production multi-agent document operations — extract, validate, policy-check, "
         "HITL, MCP-shaped ERP writeback, and evals. Compose, don't reinvent control planes."
     ),
-    version="0.3.0",
+    version="0.4.0",
     lifespan=lifespan,
 )
+
 
 
 
@@ -55,9 +56,20 @@ async def health():
         "mode": "llm" if settings.use_llm else "mock",
         "hitl_threshold": settings.confidence_hitl_threshold,
         "product": "Clearance",
-        "version": "0.3.0",
-        "skills": ["HITL", "MCP-tools", "gold-evals", "audit-export", "demo-seed", "clearance-bench"],
+        "version": "0.4.0",
+        "skills": [
+            "HITL",
+            "MCP-tools",
+            "gold-evals",
+            "audit-export",
+            "demo-seed",
+            "clearance-bench",
+            "jsonl-traces",
+            "vision-upload",
+            "claims-pack",
+        ],
     }
+
 
 
 
@@ -70,21 +82,34 @@ async def tools():
 
 @app.get("/api/samples")
 async def list_samples():
-    root = Path(__file__).resolve().parents[3] / "samples"  # app->api->apps->clearance
+    root = Path(__file__).resolve().parents[3] / "samples"
     if not root.exists():
         return []
-    return sorted(p.name for p in root.glob("*.txt"))
+    # relative paths under samples/ for nested packs
+    out: list[str] = []
+    for p in sorted(root.rglob("*.txt")):
+        rel = p.relative_to(root).as_posix()
+        # skip bulk synthetic in sample list UI (still seedable)
+        if rel.startswith("synthetic/"):
+            continue
+        out.append(rel)
+    return out
 
 
 @app.post("/api/demo/seed")
 async def seed_demo():
-    """Run all sample invoices through the pipeline (portfolio one-click demo)."""
+    """Run demo samples (root + claims; not full synthetic bulk)."""
     from app.db import CaseRow, SessionLocal, new_id, now
     from app.models.schemas import CaseStatus
     from app.services.pipeline import run_pipeline
 
     root = Path(__file__).resolve().parents[3] / "samples"
-    samples = sorted(root.glob("*.txt")) if root.exists() else []
+    samples = []
+    if root.exists():
+        samples.extend(sorted(root.glob("*.txt")))
+        claims = root / "claims"
+        if claims.exists():
+            samples.extend(sorted(claims.glob("*.txt")))
     created: list[dict] = []
     async with SessionLocal() as session:
         for path in samples:

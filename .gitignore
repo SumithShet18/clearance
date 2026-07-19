@@ -20,7 +20,9 @@ out/
 data/uploads/*
 !data/uploads/.gitkeep
 data/clearance.db
+data/traces/
 *.db
+
 samples/cord/*.png
 evals/results/latest.json
 .pytest_cache/

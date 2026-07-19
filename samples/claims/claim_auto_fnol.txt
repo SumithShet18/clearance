@@ -1,0 +1,21 @@
+First Notice of Loss — Auto Claim
+Policyholder: Jane Driver
+Policy Number: POL-AUTO-88421
+Claim Number: CLM-2026-1001
+Loss Date: 2026-06-12
+Vendor: Umbrella Logistics
+Currency: USD
+
+Incident: Rear-end collision at low speed. No injuries reported.
+Estimate / invoice reference: INV-REPAIR-4401
+
+Line items:
+- Body shop labor | 8 | 125.00 | 1000.00
+- Bumper replacement | 1 | 450.00 | 450.00
+- Paint materials | 1 | 180.00 | 180.00
+
+Subtotal: 1630.00
+Tax: 130.40
+Total: 1760.40
+
+Adjuster notes: Photos attached. Request straight-through if under deductible waived threshold.

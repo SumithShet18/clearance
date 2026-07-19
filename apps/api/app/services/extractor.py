@@ -26,6 +26,33 @@ def extract_invoice(text: str, filename: str = "") -> tuple[InvoiceExtraction, d
     return extraction, {"mode": "mock", "tokens": 0, "cost_usd": 0.0}
 
 
+def extract_from_image(image_path: str, filename: str = "") -> tuple[InvoiceExtraction, dict[str, Any]]:
+    """Multimodal vision extract when LLM key set; otherwise mock from filename/text stub."""
+    if settings.use_llm and settings.openai_api_key:
+        try:
+            return _extract_vision(image_path, filename or image_path)
+        except Exception as exc:  # noqa: BLE001
+            return _extract_mock(f"Vendor: Unknown\nInvoice Number: INV-UNKNOWN\nTotal: 0.00\n", filename), {
+                "mode": "vision_fallback",
+                "error": str(exc),
+                "tokens": 0,
+                "cost_usd": 0.0,
+            }
+    # Offline: no OCR dependency — return low-confidence shell so HITL fires
+    return InvoiceExtraction(
+        vendor_name="Unknown Vendor",
+        vendor_confidence=0.4,
+        invoice_number="INV-UNKNOWN",
+        invoice_number_confidence=0.3,
+        invoice_date="",
+        invoice_date_confidence=0.2,
+        currency="USD",
+        total=0.0,
+        total_confidence=0.2,
+        raw_notes="image upload without LLM — requires human review or CLEARANCE_MODE=llm",
+    ), {"mode": "image_mock", "tokens": 0, "cost_usd": 0.0}
+
+
 def _extract_mock(text: str, filename: str) -> InvoiceExtraction:
     # Prefer sample-tagged blocks if present
     vendor = _first(
@@ -199,3 +226,83 @@ def _extract_llm(text: str, filename: str) -> tuple[InvoiceExtraction, dict[str,
         raw_notes="llm extractor",
     )
     return extraction, {"mode": "llm", "tokens": tokens, "cost_usd": cost}
+
+
+def _extract_vision(image_path: str, filename: str) -> tuple[InvoiceExtraction, dict[str, Any]]:
+    """OpenAI vision JSON extract from image bytes (base64)."""
+    import base64
+    import json
+    import mimetypes
+    import urllib.request
+    from pathlib import Path
+
+    raw = Path(image_path).read_bytes()
+    mime = mimetypes.guess_type(filename or image_path)[0] or "image/png"
+    b64 = base64.standard_b64encode(raw).decode("ascii")
+    data_url = f"data:{mime};base64,{b64}"
+    prompt = {
+        "model": settings.openai_model if "gpt-4" in settings.openai_model or "4o" in settings.openai_model else "gpt-4o-mini",
+        "messages": [
+            {
+                "role": "system",
+                "content": (
+                    "Extract invoice/receipt fields as JSON: vendor_name, invoice_number, "
+                    "invoice_date, due_date, currency, subtotal, tax, total, line_items "
+                    "[{description, quantity, unit_price, amount}], confidences "
+                    "vendor_confidence, invoice_number_confidence, invoice_date_confidence, "
+                    "total_confidence (0-1). JSON only."
+                ),
+            },
+            {
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": f"Filename: {filename}"},
+                    {"type": "image_url", "image_url": {"url": data_url}},
+                ],
+            },
+        ],
+        "temperature": 0,
+        "response_format": {"type": "json_object"},
+        "max_tokens": 1500,
+    }
+    req = urllib.request.Request(
+        "https://api.openai.com/v1/chat/completions",
+        data=json.dumps(prompt).encode(),
+        headers={
+            "Authorization": f"Bearer {settings.openai_api_key}",
+            "Content-Type": "application/json",
+        },
+        method="POST",
+    )
+    with urllib.request.urlopen(req, timeout=90) as resp:  # noqa: S310
+        body = json.loads(resp.read().decode())
+    data = json.loads(body["choices"][0]["message"]["content"])
+    usage = body.get("usage", {})
+    tokens = int(usage.get("total_tokens", 0))
+    lines = [
+        LineItem(
+            description=str(li.get("description", "")),
+            quantity=float(li.get("quantity", 1) or 1),
+            unit_price=float(li.get("unit_price", 0) or 0),
+            amount=float(li.get("amount", 0) or 0),
+            confidence=float(li.get("confidence", 0.85) or 0.85),
+        )
+        for li in data.get("line_items", []) or []
+    ]
+    extraction = InvoiceExtraction(
+        vendor_name=str(data.get("vendor_name", "")),
+        vendor_confidence=float(data.get("vendor_confidence", 0.8)),
+        invoice_number=str(data.get("invoice_number", "")),
+        invoice_number_confidence=float(data.get("invoice_number_confidence", 0.8)),
+        invoice_date=str(data.get("invoice_date", "")),
+        invoice_date_confidence=float(data.get("invoice_date_confidence", 0.8)),
+        due_date=str(data.get("due_date", "")),
+        currency=str(data.get("currency", "USD")),
+        subtotal=float(data.get("subtotal", 0) or 0),
+        tax=float(data.get("tax", 0) or 0),
+        total=float(data.get("total", 0) or 0),
+        total_confidence=float(data.get("total_confidence", 0.8)),
+        line_items=lines,
+        raw_notes="vision extractor",
+    )
+    return extraction, {"mode": "vision", "tokens": tokens, "cost_usd": tokens * 0.0000004}

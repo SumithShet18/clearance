@@ -11,6 +11,8 @@ Portfolio project by [**SumithShet18**](https://github.com/SumithShet18)
 
 [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/SumithShet18/clearance)
 
+**v0.4** adds JSONL agent traces, image upload (vision when API key set), and a **claims FNOL** sample pack.
+
 > Enterprise AI in 2026 fails on **quality, evals, and governance** — not model IQ.  
 > Clearance is a production-shaped **multi-agent document operations** system that turns invoices into audited ERP actions with confidence gates, policy checks, human-in-the-loop, and offline gold evals.
 
