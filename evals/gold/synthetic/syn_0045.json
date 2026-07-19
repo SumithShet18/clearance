@@ -1,0 +1,19 @@
+{
+  "sample": "synthetic/syn_0045.txt",
+  "expected": {
+    "vendor_name": "Tyrell Corp",
+    "invoice_number": "SYN-2026-0045",
+    "invoice_date": "2026-11-20",
+    "currency": "EUR",
+    "subtotal": 329.38,
+    "tax": 62.58,
+    "total": 391.96,
+    "line_items": []
+  },
+  "id": "syn-0045",
+  "source": "synthetic",
+  "meta": {
+    "known_vendor": false,
+    "tag": ""
+  }
+}

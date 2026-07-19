@@ -1,0 +1,19 @@
+{
+  "sample": "synthetic/syn_0018.txt",
+  "expected": {
+    "vendor_name": "Wayne Enterprises",
+    "invoice_number": "SYN-2026-0018",
+    "invoice_date": "2026-11-28",
+    "currency": "USD",
+    "subtotal": 64.14,
+    "tax": 5.13,
+    "total": 69.27,
+    "line_items": []
+  },
+  "id": "syn-0018",
+  "source": "synthetic",
+  "meta": {
+    "known_vendor": false,
+    "tag": ""
+  }
+}

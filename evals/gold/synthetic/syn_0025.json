@@ -1,0 +1,19 @@
+{
+  "sample": "synthetic/syn_0025.txt",
+  "expected": {
+    "vendor_name": "Quantum Parts LLC",
+    "invoice_number": "SYN-2026-0025",
+    "invoice_date": "2026-10-24",
+    "currency": "USD",
+    "subtotal": 7621.48,
+    "tax": 609.72,
+    "total": 8231.2,
+    "line_items": []
+  },
+  "id": "syn-0025",
+  "source": "synthetic",
+  "meta": {
+    "known_vendor": false,
+    "tag": ""
+  }
+}

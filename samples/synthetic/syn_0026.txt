@@ -1,0 +1,14 @@
+LOWCONF SAMPLE — partial OCR noise
+Wayne Enterprises
+Vendor: Wayne Enterprises
+Invoice Number: SYN-2026-0026
+Invoice Date: 2026-07-26
+Due Date: 2026-11-28
+Currency: EUR
+
+Line items:
+- Consulting hours | 2 | 295.94 | 591.88
+
+Subtotal: 591.88
+Tax: 112.46
+Total: 704.34

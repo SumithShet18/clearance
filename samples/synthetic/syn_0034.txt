@@ -1,0 +1,16 @@
+Initech Services
+Vendor: Initech Services
+Invoice Number: SYN-2026-0034
+Invoice Date: 2026-07-08
+Due Date: 2026-03-26
+Currency: USD
+
+Line items:
+- Sensors | 10 | 355.02 | 3550.20
+- Toner | 2 | 288.75 | 577.50
+- Cables | 10 | 162.86 | 1628.60
+- Widgets | 1 | 357.60 | 357.60
+
+Subtotal: 6113.90
+Tax: 489.11
+Total: 6603.01

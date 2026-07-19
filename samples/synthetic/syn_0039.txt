@@ -1,0 +1,14 @@
+LOWCONF SAMPLE — partial OCR noise
+Tyrell Corp
+Vendor: Tyrell Corp
+Invoice Number: SYN-2026-0039
+Invoice Date: 2026-07-18
+Due Date: 2026-12-24
+Currency: EUR
+
+Line items:
+- Toner | 5 | 122.95 | 614.75
+
+Subtotal: 614.75
+Tax: 116.80
+Total: 731.55

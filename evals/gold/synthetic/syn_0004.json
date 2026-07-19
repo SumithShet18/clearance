@@ -1,13 +1,13 @@
 {
   "sample": "synthetic/syn_0004.txt",
   "expected": {
-    "vendor_name": "Umbrella Logistics",
+    "vendor_name": "Globex Industrial",
     "invoice_number": "SYN-2026-0004",
-    "invoice_date": "2026-03-16",
-    "currency": "USD",
-    "subtotal": 3403.2,
-    "tax": 272.26,
-    "total": 3675.46,
+    "invoice_date": "2026-09-24",
+    "currency": "EUR",
+    "subtotal": 1959.15,
+    "tax": 372.24,
+    "total": 2331.39,
     "line_items": []
   },
   "id": "syn-0004",

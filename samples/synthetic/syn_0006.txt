@@ -1,15 +1,15 @@
-Umbrella Logistics
-Vendor: Umbrella Logistics
+Initech Services
+Vendor: Initech Services
 Invoice Number: SYN-2026-0006
-Invoice Date: 2026-01-07
-Due Date: 2026-05-05
-Currency: EUR
+Invoice Date: 2026-06-08
+Due Date: 2026-03-17
+Currency: USD
 
 Line items:
-- Consulting hours | 10 | 355.38 | 3553.80
-- Consulting hours | 1 | 376.56 | 376.56
-- Toner | 2 | 246.31 | 492.62
+- Sensors | 2 | 102.42 | 204.84
+- Sensors | 20 | 108.78 | 2175.60
+- Toner | 10 | 359.64 | 3596.40
 
-Subtotal: 4422.98
-Tax: 840.37
-Total: 5263.35
+Subtotal: 5976.84
+Tax: 478.15
+Total: 6454.99

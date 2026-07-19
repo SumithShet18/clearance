@@ -1,0 +1,19 @@
+{
+  "sample": "synthetic/syn_0048.txt",
+  "expected": {
+    "vendor_name": "Globex Industrial",
+    "invoice_number": "SYN-2026-0048",
+    "invoice_date": "2026-07-16",
+    "currency": "USD",
+    "subtotal": 2068.01,
+    "tax": 165.44,
+    "total": 2233.45,
+    "line_items": []
+  },
+  "id": "syn-0048",
+  "source": "synthetic",
+  "meta": {
+    "known_vendor": true,
+    "tag": ""
+  }
+}

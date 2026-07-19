@@ -1,0 +1,14 @@
+ACME Supplies
+Vendor: ACME Supplies
+Invoice Number: SYN-2026-0043
+Invoice Date: 2026-11-04
+Due Date: 2026-10-07
+Currency: USD
+
+Line items:
+- Sensors | 2 | 336.50 | 673.00
+- Toner | 2 | 99.23 | 198.46
+
+Subtotal: 871.46
+Tax: 69.72
+Total: 941.18

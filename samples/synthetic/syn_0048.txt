@@ -1,0 +1,16 @@
+Globex Industrial
+Vendor: Globex Industrial
+Invoice Number: SYN-2026-0048
+Invoice Date: 2026-07-16
+Due Date: 2026-09-25
+Currency: USD
+
+Line items:
+- Consulting hours | 2 | 145.16 | 290.32
+- Sensors | 5 | 115.47 | 577.35
+- Sensors | 5 | 224.54 | 1122.70
+- Freight | 2 | 38.82 | 77.64
+
+Subtotal: 2068.01
+Tax: 165.44
+Total: 2233.45

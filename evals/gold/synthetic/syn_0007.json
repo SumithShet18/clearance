@@ -1,19 +1,19 @@
 {
   "sample": "synthetic/syn_0007.txt",
   "expected": {
-    "vendor_name": "Tyrell Corp",
+    "vendor_name": "ACME Supplies",
     "invoice_number": "SYN-2026-0007",
-    "invoice_date": "2026-07-08",
-    "currency": "EUR",
-    "subtotal": 9774.91,
-    "tax": 1857.23,
-    "total": 11632.14,
+    "invoice_date": "2026-10-15",
+    "currency": "USD",
+    "subtotal": 1237.54,
+    "tax": 99.0,
+    "total": 1336.54,
     "line_items": []
   },
   "id": "syn-0007",
   "source": "synthetic",
   "meta": {
-    "known_vendor": false,
+    "known_vendor": true,
     "tag": ""
   }
 }

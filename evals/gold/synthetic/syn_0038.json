@@ -1,0 +1,19 @@
+{
+  "sample": "synthetic/syn_0038.txt",
+  "expected": {
+    "vendor_name": "Initech Services",
+    "invoice_number": "SYN-2026-0038",
+    "invoice_date": "2026-10-23",
+    "currency": "EUR",
+    "subtotal": 667.98,
+    "tax": 126.92,
+    "total": 794.9,
+    "line_items": []
+  },
+  "id": "syn-0038",
+  "source": "synthetic",
+  "meta": {
+    "known_vendor": true,
+    "tag": ""
+  }
+}

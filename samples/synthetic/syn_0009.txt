@@ -1,14 +1,15 @@
-Globex Industrial
-Vendor: Globex Industrial
+Oscorp Materials
+Vendor: Oscorp Materials
 Invoice Number: SYN-2026-0009
-Invoice Date: 2026-09-13
-Due Date: 2026-07-13
+Invoice Date: 2026-05-08
+Due Date: 2026-01-08
 Currency: USD
 
 Line items:
-- Freight | 20 | 380.34 | 7606.80
-- Freight | 1 | 185.37 | 185.37
+- Sensors | 2 | 218.05 | 436.10
+- Toner | 1 | 241.58 | 241.58
+- Consulting hours | 1 | 49.19 | 49.19
 
-Subtotal: 7792.17
-Tax: 623.37
-Total: 8415.54
+Subtotal: 726.87
+Tax: 58.15
+Total: 785.02

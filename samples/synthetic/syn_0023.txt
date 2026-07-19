@@ -1,0 +1,14 @@
+Northwind Traders
+Vendor: Northwind Traders
+Invoice Number: SYN-2026-0023
+Invoice Date: 2026-05-02
+Due Date: 2026-01-11
+Currency: USD
+
+Line items:
+- Consulting hours | 5 | 204.64 | 1023.20
+- Toner | 1 | 41.46 | 41.46
+
+Subtotal: 1064.66
+Tax: 85.17
+Total: 1149.83

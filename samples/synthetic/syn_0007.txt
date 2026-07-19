@@ -1,16 +1,14 @@
-Tyrell Corp
-Vendor: Tyrell Corp
+ACME Supplies
+Vendor: ACME Supplies
 Invoice Number: SYN-2026-0007
-Invoice Date: 2026-07-08
-Due Date: 2026-03-03
-Currency: EUR
+Invoice Date: 2026-10-15
+Due Date: 2026-09-09
+Currency: USD
 
 Line items:
-- Toner | 1 | 70.71 | 70.71
-- Cables | 20 | 114.75 | 2295.00
-- Consulting hours | 10 | 346.27 | 3462.70
-- Freight | 10 | 394.65 | 3946.50
+- Toner | 2 | 317.87 | 635.74
+- Toner | 20 | 30.09 | 601.80
 
-Subtotal: 9774.91
-Tax: 1857.23
-Total: 11632.14
+Subtotal: 1237.54
+Tax: 99.00
+Total: 1336.54

@@ -1,13 +1,13 @@
 {
   "sample": "synthetic/syn_0006.txt",
   "expected": {
-    "vendor_name": "Umbrella Logistics",
+    "vendor_name": "Initech Services",
     "invoice_number": "SYN-2026-0006",
-    "invoice_date": "2026-01-07",
-    "currency": "EUR",
-    "subtotal": 4422.98,
-    "tax": 840.37,
-    "total": 5263.35,
+    "invoice_date": "2026-06-08",
+    "currency": "USD",
+    "subtotal": 5976.84,
+    "tax": 478.15,
+    "total": 6454.99,
     "line_items": []
   },
   "id": "syn-0006",

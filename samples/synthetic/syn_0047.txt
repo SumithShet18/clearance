@@ -1,0 +1,16 @@
+Umbrella Logistics
+Vendor: Umbrella Logistics
+Invoice Number: SYN-2026-0047
+Invoice Date: 2026-10-22
+Due Date: 2026-07-11
+Currency: EUR
+
+Line items:
+- Sensors | 10 | 331.17 | 3311.70
+- Cables | 5 | 132.31 | 661.55
+- Toner | 1 | 115.18 | 115.18
+- Sensors | 2 | 301.44 | 602.88
+
+Subtotal: 4691.31
+Tax: 891.35
+Total: 5582.66

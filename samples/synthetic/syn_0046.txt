@@ -1,0 +1,16 @@
+Quantum Parts LLC
+Vendor: Quantum Parts LLC
+Invoice Number: SYN-2026-0046
+Invoice Date: 2026-03-24
+Due Date: 2026-09-21
+Currency: USD
+
+Line items:
+- Freight | 5 | 32.24 | 161.20
+- Toner | 5 | 10.00 | 50.00
+- Consulting hours | 10 | 46.69 | 466.90
+- Toner | 10 | 284.39 | 2843.90
+
+Subtotal: 3522.00
+Tax: 281.76
+Total: 3803.76

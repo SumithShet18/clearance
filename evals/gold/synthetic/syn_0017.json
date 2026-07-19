@@ -1,0 +1,19 @@
+{
+  "sample": "synthetic/syn_0017.txt",
+  "expected": {
+    "vendor_name": "Soylent Foods",
+    "invoice_number": "SYN-2026-0017",
+    "invoice_date": "2026-12-11",
+    "currency": "USD",
+    "subtotal": 6367.35,
+    "tax": 509.39,
+    "total": 6876.74,
+    "line_items": []
+  },
+  "id": "syn-0017",
+  "source": "synthetic",
+  "meta": {
+    "known_vendor": false,
+    "tag": ""
+  }
+}

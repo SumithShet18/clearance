@@ -1,6 +1,6 @@
 # Clearance Bench Report
 
-Generated: `2026-07-19T09:55:06.913461+00:00`
+Generated: `2026-07-19T09:55:53.035844+00:00`
 
 ## Extraction (per-field)
 

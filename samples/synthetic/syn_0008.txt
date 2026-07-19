@@ -1,13 +1,15 @@
-Northwind Traders
-Vendor: Northwind Traders
+Quantum Parts LLC
+Vendor: Quantum Parts LLC
 Invoice Number: SYN-2026-0008
-Invoice Date: 2026-05-10
-Due Date: 2026-01-05
+Invoice Date: 2026-09-04
+Due Date: 2026-11-10
 Currency: USD
 
 Line items:
-- Cables | 10 | 333.28 | 3332.80
+- Toner | 5 | 49.06 | 245.30
+- Freight | 2 | 184.22 | 368.44
+- Cables | 5 | 388.90 | 1944.50
 
-Subtotal: 3332.80
-Tax: 266.62
-Total: 3599.42
+Subtotal: 2558.24
+Tax: 204.66
+Total: 2762.90

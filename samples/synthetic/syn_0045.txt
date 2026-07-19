@@ -1,0 +1,14 @@
+Tyrell Corp
+Vendor: Tyrell Corp
+Invoice Number: SYN-2026-0045
+Invoice Date: 2026-11-20
+Due Date: 2026-02-26
+Currency: EUR
+
+Line items:
+- Freight | 1 | 238.88 | 238.88
+- Consulting hours | 2 | 45.25 | 90.50
+
+Subtotal: 329.38
+Tax: 62.58
+Total: 391.96

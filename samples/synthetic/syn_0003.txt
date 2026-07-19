@@ -1,15 +1,16 @@
-Soylent Foods
-Vendor: Soylent Foods
+Initech Services
+Vendor: Initech Services
 Invoice Number: SYN-2026-0003
-Invoice Date: 2026-09-16
-Due Date: 2026-06-24
-Currency: EUR
+Invoice Date: 2026-02-28
+Due Date: 2026-04-28
+Currency: USD
 
 Line items:
-- Toner | 10 | 236.30 | 2363.00
-- Cables | 5 | 123.41 | 617.05
-- Consulting hours | 2 | 37.33 | 74.66
+- Freight | 1 | 223.06 | 223.06
+- Consulting hours | 20 | 354.75 | 7095.00
+- Widgets | 20 | 80.95 | 1619.00
+- Consulting hours | 1 | 266.20 | 266.20
 
-Subtotal: 3054.71
-Tax: 580.39
-Total: 3635.10
+Subtotal: 9203.26
+Tax: 736.26
+Total: 9939.52

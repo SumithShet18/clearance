@@ -1,0 +1,13 @@
+Initech Services
+Vendor: Initech Services
+Invoice Number: SYN-2026-0038
+Invoice Date: 2026-10-23
+Due Date: 2026-01-28
+Currency: EUR
+
+Line items:
+- Toner | 2 | 333.99 | 667.98
+
+Subtotal: 667.98
+Tax: 126.92
+Total: 794.90

@@ -1,0 +1,15 @@
+Umbrella Logistics
+Vendor: Umbrella Logistics
+Invoice Number: SYN-2026-0030
+Invoice Date: 2026-11-11
+Due Date: 2026-10-11
+Currency: USD
+
+Line items:
+- Widgets | 1 | 284.97 | 284.97
+- Sensors | 20 | 370.60 | 7412.00
+- Widgets | 2 | 148.87 | 297.74
+
+Subtotal: 7994.71
+Tax: 639.58
+Total: 8634.29

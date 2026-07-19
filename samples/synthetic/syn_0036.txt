@@ -1,0 +1,14 @@
+Tyrell Corp
+Vendor: Tyrell Corp
+Invoice Number: SYN-2026-0036
+Invoice Date: 2026-08-21
+Due Date: 2026-04-09
+Currency: EUR
+
+Line items:
+- Cables | 10 | 182.78 | 1827.80
+- Sensors | 5 | 307.50 | 1537.50
+
+Subtotal: 3365.30
+Tax: 639.41
+Total: 4004.71

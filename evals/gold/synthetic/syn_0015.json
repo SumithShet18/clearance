@@ -1,0 +1,19 @@
+{
+  "sample": "synthetic/syn_0015.txt",
+  "expected": {
+    "vendor_name": "Stark Industries",
+    "invoice_number": "SYN-2026-0015",
+    "invoice_date": "2026-03-14",
+    "currency": "USD",
+    "subtotal": 370.91,
+    "tax": 29.67,
+    "total": 400.58,
+    "line_items": []
+  },
+  "id": "syn-0015",
+  "source": "synthetic",
+  "meta": {
+    "known_vendor": false,
+    "tag": ""
+  }
+}

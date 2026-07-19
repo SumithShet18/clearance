@@ -1,16 +1,14 @@
-ACME Supplies
-Vendor: ACME Supplies
+Umbrella Logistics
+Vendor: Umbrella Logistics
 Invoice Number: SYN-2026-0001
-Invoice Date: 2026-10-13
-Due Date: 2026-01-08
-Currency: EUR
+Invoice Date: 2026-03-23
+Due Date: 2026-07-11
+Currency: USD
 
 Line items:
-- Sensors | 1 | 100.06 | 100.06
-- Sensors | 10 | 28.35 | 283.50
-- Freight | 1 | 379.24 | 379.24
-- Sensors | 20 | 379.35 | 7587.00
+- Toner | 20 | 170.71 | 3414.20
+- Widgets | 20 | 114.89 | 2297.80
 
-Subtotal: 8349.80
-Tax: 1586.46
-Total: 9936.26
+Subtotal: 5712.00
+Tax: 456.96
+Total: 6168.96

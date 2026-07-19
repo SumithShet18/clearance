@@ -1,0 +1,16 @@
+Umbrella Logistics
+Vendor: Umbrella Logistics
+Invoice Number: SYN-2026-0040
+Invoice Date: 2026-01-13
+Due Date: 2026-10-19
+Currency: USD
+
+Line items:
+- Toner | 2 | 112.81 | 225.62
+- Freight | 1 | 158.60 | 158.60
+- Toner | 10 | 291.05 | 2910.50
+- Sensors | 2 | 392.39 | 784.78
+
+Subtotal: 4079.50
+Tax: 326.36
+Total: 4405.86

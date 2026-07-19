@@ -1,0 +1,13 @@
+Wayne Enterprises
+Vendor: Wayne Enterprises
+Invoice Number: SYN-2026-0018
+Invoice Date: 2026-11-28
+Due Date: 2026-04-13
+Currency: USD
+
+Line items:
+- Widgets | 2 | 32.07 | 64.14
+
+Subtotal: 64.14
+Tax: 5.13
+Total: 69.27

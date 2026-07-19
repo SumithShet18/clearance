@@ -1,0 +1,19 @@
+{
+  "sample": "synthetic/syn_0035.txt",
+  "expected": {
+    "vendor_name": "Soylent Foods",
+    "invoice_number": "SYN-2026-0035",
+    "invoice_date": "2026-06-25",
+    "currency": "USD",
+    "subtotal": 8089.7,
+    "tax": 647.18,
+    "total": 8736.88,
+    "line_items": []
+  },
+  "id": "syn-0035",
+  "source": "synthetic",
+  "meta": {
+    "known_vendor": false,
+    "tag": ""
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "sample": "synthetic/syn_0029.txt",
+  "expected": {
+    "vendor_name": "Wonka Imports",
+    "invoice_number": "SYN-2026-0029",
+    "invoice_date": "2026-06-14",
+    "currency": "USD",
+    "subtotal": 3533.0,
+    "tax": 282.64,
+    "total": 3815.64,
+    "line_items": []
+  },
+  "id": "syn-0029",
+  "source": "synthetic",
+  "meta": {
+    "known_vendor": false,
+    "tag": ""
+  }
+}

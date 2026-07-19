@@ -1,0 +1,14 @@
+Globex Industrial
+Vendor: Globex Industrial
+Invoice Number: SYN-2026-0014
+Invoice Date: 2026-08-08
+Due Date: 2026-02-15
+Currency: USD
+
+Line items:
+- Toner | 2 | 80.13 | 160.26
+- Consulting hours | 2 | 171.64 | 343.28
+
+Subtotal: 503.54
+Tax: 40.28
+Total: 543.82

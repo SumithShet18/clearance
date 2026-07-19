@@ -1,13 +1,13 @@
 {
   "sample": "synthetic/syn_0001.txt",
   "expected": {
-    "vendor_name": "ACME Supplies",
+    "vendor_name": "Umbrella Logistics",
     "invoice_number": "SYN-2026-0001",
-    "invoice_date": "2026-10-13",
-    "currency": "EUR",
-    "subtotal": 8349.8,
-    "tax": 1586.46,
-    "total": 9936.26,
+    "invoice_date": "2026-03-23",
+    "currency": "USD",
+    "subtotal": 5712.0,
+    "tax": 456.96,
+    "total": 6168.96,
     "line_items": []
   },
   "id": "syn-0001",

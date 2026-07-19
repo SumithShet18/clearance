@@ -1,0 +1,13 @@
+ACME Supplies
+Vendor: ACME Supplies
+Invoice Number: SYN-2026-0012
+Invoice Date: 2026-09-08
+Due Date: 2026-05-22
+Currency: USD
+
+Line items:
+- Widgets | 1 | 344.56 | 344.56
+
+Subtotal: 344.56
+Tax: 27.56
+Total: 372.12

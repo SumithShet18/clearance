@@ -1,0 +1,19 @@
+{
+  "sample": "synthetic/syn_0030.txt",
+  "expected": {
+    "vendor_name": "Umbrella Logistics",
+    "invoice_number": "SYN-2026-0030",
+    "invoice_date": "2026-11-11",
+    "currency": "USD",
+    "subtotal": 7994.71,
+    "tax": 639.58,
+    "total": 8634.29,
+    "line_items": []
+  },
+  "id": "syn-0030",
+  "source": "synthetic",
+  "meta": {
+    "known_vendor": true,
+    "tag": ""
+  }
+}

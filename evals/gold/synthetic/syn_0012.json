@@ -1,0 +1,19 @@
+{
+  "sample": "synthetic/syn_0012.txt",
+  "expected": {
+    "vendor_name": "ACME Supplies",
+    "invoice_number": "SYN-2026-0012",
+    "invoice_date": "2026-09-08",
+    "currency": "USD",
+    "subtotal": 344.56,
+    "tax": 27.56,
+    "total": 372.12,
+    "line_items": []
+  },
+  "id": "syn-0012",
+  "source": "synthetic",
+  "meta": {
+    "known_vendor": true,
+    "tag": ""
+  }
+}

@@ -1,0 +1,17 @@
+LOWCONF SAMPLE — partial OCR noise
+Umbrella Logistics
+Vendor: Umbrella Logistics
+Invoice Number: SYN-2026-0013
+Invoice Date: 2026-11-21
+Due Date: 2026-11-04
+Currency: USD
+
+Line items:
+- Toner | 2 | 314.92 | 629.84
+- Freight | 2 | 42.26 | 84.52
+- Toner | 10 | 144.95 | 1449.50
+- Widgets | 10 | 346.22 | 3462.20
+
+Subtotal: 5626.06
+Tax: 450.08
+Total: 6076.14

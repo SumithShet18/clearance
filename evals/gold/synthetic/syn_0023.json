@@ -1,0 +1,19 @@
+{
+  "sample": "synthetic/syn_0023.txt",
+  "expected": {
+    "vendor_name": "Northwind Traders",
+    "invoice_number": "SYN-2026-0023",
+    "invoice_date": "2026-05-02",
+    "currency": "USD",
+    "subtotal": 1064.66,
+    "tax": 85.17,
+    "total": 1149.83,
+    "line_items": []
+  },
+  "id": "syn-0023",
+  "source": "synthetic",
+  "meta": {
+    "known_vendor": true,
+    "tag": ""
+  }
+}

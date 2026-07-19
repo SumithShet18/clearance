@@ -1,0 +1,14 @@
+Soylent Foods
+Vendor: Soylent Foods
+Invoice Number: SYN-2026-0035
+Invoice Date: 2026-06-25
+Due Date: 2026-08-20
+Currency: USD
+
+Line items:
+- Toner | 1 | 185.30 | 185.30
+- Sensors | 20 | 395.22 | 7904.40
+
+Subtotal: 8089.70
+Tax: 647.18
+Total: 8736.88

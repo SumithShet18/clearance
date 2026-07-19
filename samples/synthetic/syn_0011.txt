@@ -1,14 +1,15 @@
-Stark Industries
-Vendor: Stark Industries
+Globex Industrial
+Vendor: Globex Industrial
 Invoice Number: SYN-2026-0011
-Invoice Date: 2026-10-13
-Due Date: 2026-03-21
-Currency: USD
+Invoice Date: 2026-04-19
+Due Date: 2026-04-01
+Currency: EUR
 
 Line items:
-- Consulting hours | 20 | 374.73 | 7494.60
-- Cables | 20 | 125.27 | 2505.40
+- Toner | 10 | 360.35 | 3603.50
+- Widgets | 1 | 102.92 | 102.92
+- Sensors | 5 | 13.31 | 66.55
 
-Subtotal: 10000.00
-Tax: 800.00
-Total: 10800.00
+Subtotal: 3772.97
+Tax: 716.86
+Total: 4489.83

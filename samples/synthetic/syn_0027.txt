@@ -1,0 +1,14 @@
+Oscorp Materials
+Vendor: Oscorp Materials
+Invoice Number: SYN-2026-0027
+Invoice Date: 2026-06-10
+Due Date: 2026-04-08
+Currency: USD
+
+Line items:
+- Widgets | 1 | 156.10 | 156.10
+- Toner | 10 | 92.86 | 928.60
+
+Subtotal: 1084.70
+Tax: 86.78
+Total: 1171.48

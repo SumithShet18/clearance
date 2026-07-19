@@ -1,0 +1,15 @@
+Globex Industrial
+Vendor: Globex Industrial
+Invoice Number: SYN-2026-0037
+Invoice Date: 2026-04-03
+Due Date: 2026-07-14
+Currency: USD
+
+Line items:
+- Sensors | 5 | 131.29 | 656.45
+- Cables | 1 | 59.66 | 59.66
+- Freight | 10 | 279.11 | 2791.10
+
+Subtotal: 3507.21
+Tax: 280.58
+Total: 3787.79

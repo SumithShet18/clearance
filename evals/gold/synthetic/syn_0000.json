@@ -1,19 +1,19 @@
 {
   "sample": "synthetic/syn_0000.txt",
   "expected": {
-    "vendor_name": "Northwind Traders",
+    "vendor_name": "Quantum Parts LLC",
     "invoice_number": "SYN-2026-0000",
-    "invoice_date": "2026-06-19",
-    "currency": "EUR",
-    "subtotal": 329.4,
-    "tax": 62.59,
-    "total": 391.99,
+    "invoice_date": "2026-01-01",
+    "currency": "USD",
+    "subtotal": 10000.0,
+    "tax": 800.0,
+    "total": 10800.0,
     "line_items": []
   },
   "id": "syn-0000",
   "source": "synthetic",
   "meta": {
-    "known_vendor": true,
-    "tag": "LOWCONF"
+    "known_vendor": false,
+    "tag": "HIGHVALUE LOWCONF"
   }
 }

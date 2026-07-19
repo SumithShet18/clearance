@@ -1,19 +1,19 @@
 {
   "sample": "synthetic/syn_0003.txt",
   "expected": {
-    "vendor_name": "Soylent Foods",
+    "vendor_name": "Initech Services",
     "invoice_number": "SYN-2026-0003",
-    "invoice_date": "2026-09-16",
-    "currency": "EUR",
-    "subtotal": 3054.71,
-    "tax": 580.39,
-    "total": 3635.1,
+    "invoice_date": "2026-02-28",
+    "currency": "USD",
+    "subtotal": 9203.26,
+    "tax": 736.26,
+    "total": 9939.52,
     "line_items": []
   },
   "id": "syn-0003",
   "source": "synthetic",
   "meta": {
-    "known_vendor": false,
+    "known_vendor": true,
     "tag": ""
   }
 }

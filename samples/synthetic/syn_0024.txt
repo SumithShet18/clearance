@@ -1,0 +1,16 @@
+Wonka Imports
+Vendor: Wonka Imports
+Invoice Number: SYN-2026-0024
+Invoice Date: 2026-03-02
+Due Date: 2026-05-12
+Currency: USD
+
+Line items:
+- Sensors | 20 | 283.74 | 5674.80
+- Freight | 1 | 49.19 | 49.19
+- Consulting hours | 2 | 220.51 | 441.02
+- Toner | 20 | 223.25 | 4465.00
+
+Subtotal: 10630.01
+Tax: 850.40
+Total: 11480.41

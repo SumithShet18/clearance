@@ -1,19 +1,19 @@
 {
   "sample": "synthetic/syn_0009.txt",
   "expected": {
-    "vendor_name": "Globex Industrial",
+    "vendor_name": "Oscorp Materials",
     "invoice_number": "SYN-2026-0009",
-    "invoice_date": "2026-09-13",
+    "invoice_date": "2026-05-08",
     "currency": "USD",
-    "subtotal": 7792.17,
-    "tax": 623.37,
-    "total": 8415.54,
+    "subtotal": 726.87,
+    "tax": 58.15,
+    "total": 785.02,
     "line_items": []
   },
   "id": "syn-0009",
   "source": "synthetic",
   "meta": {
-    "known_vendor": true,
+    "known_vendor": false,
     "tag": ""
   }
 }

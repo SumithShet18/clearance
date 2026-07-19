@@ -1,14 +1,15 @@
 LOWCONF SAMPLE — partial OCR noise
-Northwind Traders
-Vendor: Northwind Traders
+Quantum Parts LLC
+Vendor: Quantum Parts LLC
 Invoice Number: SYN-2026-0000
-Invoice Date: 2026-06-19
-Due Date: 2026-01-17
-Currency: EUR
+Invoice Date: 2026-01-01
+Due Date: 2026-02-07
+Currency: USD
 
 Line items:
-- Widgets | 1 | 329.40 | 329.40
+- Widgets | 2 | 662.82 | 1325.63
+- Toner | 20 | 433.72 | 8674.37
 
-Subtotal: 329.40
-Tax: 62.59
-Total: 391.99
+Subtotal: 10000.00
+Tax: 800.00
+Total: 10800.00

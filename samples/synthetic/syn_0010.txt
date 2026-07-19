@@ -1,13 +1,16 @@
-Initech Services
-Vendor: Initech Services
+Stark Industries
+Vendor: Stark Industries
 Invoice Number: SYN-2026-0010
-Invoice Date: 2026-08-06
-Due Date: 2026-02-11
-Currency: EUR
+Invoice Date: 2026-09-25
+Due Date: 2026-12-23
+Currency: USD
 
 Line items:
-- Cables | 2 | 31.60 | 63.20
+- Sensors | 1 | 391.30 | 391.30
+- Toner | 2 | 55.71 | 111.42
+- Sensors | 20 | 70.23 | 1404.60
+- Cables | 20 | 172.14 | 3442.80
 
-Subtotal: 63.20
-Tax: 12.01
-Total: 75.21
+Subtotal: 5350.12
+Tax: 428.01
+Total: 5778.13
