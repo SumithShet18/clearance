@@ -1,0 +1,14 @@
+Globex Industrial
+Vendor: Globex Industrial
+Invoice Number: SYN-2026-0009
+Invoice Date: 2026-09-13
+Due Date: 2026-07-13
+Currency: USD
+
+Line items:
+- Freight | 20 | 380.34 | 7606.80
+- Freight | 1 | 185.37 | 185.37
+
+Subtotal: 7792.17
+Tax: 623.37
+Total: 8415.54

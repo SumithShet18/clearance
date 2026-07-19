@@ -1,0 +1,13 @@
+Initech Services
+Vendor: Initech Services
+Invoice Number: SYN-2026-0010
+Invoice Date: 2026-08-06
+Due Date: 2026-02-11
+Currency: EUR
+
+Line items:
+- Cables | 2 | 31.60 | 63.20
+
+Subtotal: 63.20
+Tax: 12.01
+Total: 75.21

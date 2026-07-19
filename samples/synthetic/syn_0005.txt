@@ -1,0 +1,15 @@
+Stark Industries
+Vendor: Stark Industries
+Invoice Number: SYN-2026-0005
+Invoice Date: 2026-02-02
+Due Date: 2026-12-23
+Currency: USD
+
+Line items:
+- Sensors | 5 | 239.78 | 1198.90
+- Widgets | 10 | 32.16 | 321.60
+- Freight | 5 | 192.27 | 961.35
+
+Subtotal: 2481.85
+Tax: 198.55
+Total: 2680.40

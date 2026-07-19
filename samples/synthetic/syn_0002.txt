@@ -1,0 +1,16 @@
+Northwind Traders
+Vendor: Northwind Traders
+Invoice Number: SYN-2026-0002
+Invoice Date: 2026-12-03
+Due Date: 2026-10-02
+Currency: USD
+
+Line items:
+- Sensors | 2 | 218.57 | 437.14
+- Freight | 5 | 226.30 | 1131.50
+- Sensors | 2 | 45.71 | 91.42
+- Sensors | 2 | 152.10 | 304.20
+
+Subtotal: 1964.26
+Tax: 157.14
+Total: 2121.40

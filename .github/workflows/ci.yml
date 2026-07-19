@@ -19,12 +19,21 @@ jobs:
       - name: Install
         run: pip install -r requirements.txt
       - name: Unit + integration + gold evals
+        env:
+          PYTHONPATH: ${{ github.workspace }}:${{ github.workspace }}/apps/api
         run: pytest -q
+      - name: Clearance Bench (synthetic)
+        env:
+          PYTHONPATH: ${{ github.workspace }}:${{ github.workspace }}/apps/api
+        working-directory: ${{ github.workspace }}
+        run: python evals/run_benchmark.py --source synthetic --limit 50 --regenerate
       - name: API smoke
+        env:
+          PYTHONPATH: ${{ github.workspace }}/apps/api
         run: |
           uvicorn app.main:app --host 127.0.0.1 --port 8000 &
           sleep 2
           curl -sf http://127.0.0.1:8000/api/health
           curl -sf -X POST http://127.0.0.1:8000/api/demo/seed
-          curl -sf http://127.0.0.1:8000/api/evals/run | tee /tmp/eval.json
-          python -c "import json; d=json.load(open('/tmp/eval.json')); assert d['field_accuracy']>=0.75"
+          curl -sf "http://127.0.0.1:8000/api/evals/benchmark?source=synthetic&limit=20" | tee /tmp/bench.json
+          python -c "import json; d=json.load(open('/tmp/bench.json')); assert d['micro_field_accuracy']>=0.9"

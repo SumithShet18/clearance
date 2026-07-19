@@ -1,0 +1,16 @@
+ACME Supplies
+Vendor: ACME Supplies
+Invoice Number: SYN-2026-0001
+Invoice Date: 2026-10-13
+Due Date: 2026-01-08
+Currency: EUR
+
+Line items:
+- Sensors | 1 | 100.06 | 100.06
+- Sensors | 10 | 28.35 | 283.50
+- Freight | 1 | 379.24 | 379.24
+- Sensors | 20 | 379.35 | 7587.00
+
+Subtotal: 8349.80
+Tax: 1586.46
+Total: 9936.26

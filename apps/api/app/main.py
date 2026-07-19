@@ -27,9 +27,10 @@ app = FastAPI(
         "Production multi-agent document operations — extract, validate, policy-check, "
         "HITL, MCP-shaped ERP writeback, and evals. Compose, don't reinvent control planes."
     ),
-    version="0.2.0",
+    version="0.3.0",
     lifespan=lifespan,
 )
+
 
 
 
@@ -54,9 +55,10 @@ async def health():
         "mode": "llm" if settings.use_llm else "mock",
         "hitl_threshold": settings.confidence_hitl_threshold,
         "product": "Clearance",
-        "version": "0.2.0",
-        "skills": ["HITL", "MCP-tools", "gold-evals", "audit-export", "demo-seed"],
+        "version": "0.3.0",
+        "skills": ["HITL", "MCP-tools", "gold-evals", "audit-export", "demo-seed", "clearance-bench"],
     }
+
 
 
 

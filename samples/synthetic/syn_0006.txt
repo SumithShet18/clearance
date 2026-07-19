@@ -1,0 +1,15 @@
+Umbrella Logistics
+Vendor: Umbrella Logistics
+Invoice Number: SYN-2026-0006
+Invoice Date: 2026-01-07
+Due Date: 2026-05-05
+Currency: EUR
+
+Line items:
+- Consulting hours | 10 | 355.38 | 3553.80
+- Consulting hours | 1 | 376.56 | 376.56
+- Toner | 2 | 246.31 | 492.62
+
+Subtotal: 4422.98
+Tax: 840.37
+Total: 5263.35

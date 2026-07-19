@@ -1,0 +1,13 @@
+Northwind Traders
+Vendor: Northwind Traders
+Invoice Number: SYN-2026-0008
+Invoice Date: 2026-05-10
+Due Date: 2026-01-05
+Currency: USD
+
+Line items:
+- Cables | 10 | 333.28 | 3332.80
+
+Subtotal: 3332.80
+Tax: 266.62
+Total: 3599.42

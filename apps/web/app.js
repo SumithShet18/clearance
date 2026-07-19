@@ -33,7 +33,27 @@ async function boot() {
       $("#btnEval").disabled = false;
     }
   });
+  $("#btnBench").addEventListener("click", runBench);
   $("#btnSeed").addEventListener("click", seedDemo);
+}
+
+async function runBench() {
+  const btn = $("#btnBench");
+  btn.disabled = true;
+  btn.textContent = "Benchmarking…";
+  try {
+    const r = await api("/api/evals/benchmark?source=synthetic&limit=50");
+    const pf = r.per_field || {};
+    toast(
+      `Bench ${r.cases} docs · micro ${pct(r.micro_field_accuracy)} · vendor ${pct(pf.vendor)} · total ${pct(pf.total)}`
+    );
+    $("#mEval").textContent = pct(r.micro_field_accuracy);
+  } catch (e) {
+    toast(`Bench failed: ${e.message}`);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Run Clearance Bench (50)";
+  }
 }
 
 async function seedDemo() {

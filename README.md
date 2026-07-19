@@ -114,6 +114,26 @@ Optional LLM: set `OPENAI_API_KEY` and `CLEARANCE_MODE=llm` (see `apps/api/.env.
 
 ---
 
+## Clearance Bench (datasets + metrics)
+
+Research-backed evaluation track (public invoice/receipt corpora + synthetic gold):
+
+| Track | Source | Purpose |
+| --- | --- | --- |
+| **Synthetic** (default) | 50 reproducible invoices (no PII) | CI + portfolio numbers |
+| **CORD v2** (optional) | HF `naver-clova-ix/cord-v2` | Real receipts credibility |
+| **Manual** | `samples/invoice_*.txt` | Demo storytelling |
+
+```bash
+# from repo root
+set PYTHONPATH=.
+apps\api\.venv\Scripts\python evals\run_benchmark.py --source synthetic --limit 50 --pipeline
+```
+
+See published numbers in **[evals/REPORT.md](evals/REPORT.md)**.
+
+API: `GET /api/evals/benchmark?source=synthetic&limit=50` · UI button **Run Clearance Bench (50)**.
+
 ## Tests
 
 ```bash

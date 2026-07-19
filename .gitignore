@@ -21,6 +21,9 @@ data/uploads/*
 !data/uploads/.gitkeep
 data/clearance.db
 *.db
+samples/cord/*.png
+evals/results/latest.json
+.pytest_cache/
 
 # IDE / OS
 .DS_Store

@@ -1,0 +1,16 @@
+Tyrell Corp
+Vendor: Tyrell Corp
+Invoice Number: SYN-2026-0007
+Invoice Date: 2026-07-08
+Due Date: 2026-03-03
+Currency: EUR
+
+Line items:
+- Toner | 1 | 70.71 | 70.71
+- Cables | 20 | 114.75 | 2295.00
+- Consulting hours | 10 | 346.27 | 3462.70
+- Freight | 10 | 394.65 | 3946.50
+
+Subtotal: 9774.91
+Tax: 1857.23
+Total: 11632.14

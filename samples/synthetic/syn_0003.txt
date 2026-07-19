@@ -1,0 +1,15 @@
+Soylent Foods
+Vendor: Soylent Foods
+Invoice Number: SYN-2026-0003
+Invoice Date: 2026-09-16
+Due Date: 2026-06-24
+Currency: EUR
+
+Line items:
+- Toner | 10 | 236.30 | 2363.00
+- Cables | 5 | 123.41 | 617.05
+- Consulting hours | 2 | 37.33 | 74.66
+
+Subtotal: 3054.71
+Tax: 580.39
+Total: 3635.10
