@@ -15,14 +15,21 @@ class LoginBody(BaseModel):
 
 @router.get("/status")
 async def auth_status():
+    import os
+
+    # Safe diagnostics (never return the password value)
+    raw = os.environ.get("CLEARANCE_PASSWORD")
     return {
         "auth_required": settings.auth_required,
         "demo_mode": settings.clearance_demo,
         "product": "Clearance",
+        "password_env_present": raw is not None,
+        "password_env_nonempty": bool(raw and str(raw).strip()),
         "hint": (
-            "Set env CLEARANCE_PASSWORD to enable login"
+            "CLEARANCE_PASSWORD is missing or empty on this process. "
+            "In Render: Environment → set CLEARANCE_PASSWORD → Save → Manual Deploy → Clear build cache if needed."
             if not settings.auth_required
-            else "Login required — POST /api/auth/login"
+            else "Login required — open the site and sign in"
         ),
     }
 

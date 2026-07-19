@@ -33,9 +33,15 @@ def session_valid(token: str | None) -> bool:
 
 
 def check_password(password: str) -> bool:
-    if not settings.auth_required:
+    expected = settings.effective_password
+    if not expected:
         return True
-    return secrets.compare_digest(password, settings.clearance_password)
+    # constant-time compare; pad lengths carefully via compare_digest on equal-length only
+    # secrets.compare_digest requires same type/length — use hmac style
+    try:
+        return secrets.compare_digest(password.encode("utf-8"), expected.encode("utf-8"))
+    except (TypeError, ValueError):
+        return False
 
 
 PUBLIC_PREFIXES = (
