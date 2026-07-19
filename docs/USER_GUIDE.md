@@ -45,11 +45,40 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000
 
 ---
 
+## Login / logout — when it appears
+
+Login **only shows if the server has a password**:
+
+| `CLEARANCE_PASSWORD` | What you see |
+| --- | --- |
+| **empty** (default) | **No login, no logout** — open access. Badge shows `open access`. |
+| **set** (e.g. `mysecret`) | Login card on open; **Log out** after sign-in |
+
+Check: open `/api/auth/status` — if `"auth_required": false`, password is not set.
+
+### Enable login on Render
+
+1. [Render Dashboard](https://dashboard.render.com) → your **clearance** service  
+2. **Environment** → **Add Environment Variable**  
+3. Key: `CLEARANCE_PASSWORD` · Value: your password  
+4. **Save** → service restarts  
+5. Hard-refresh the site (Ctrl+Shift+R)  
+6. You should see the sign-in card; after login, **Log out** in the top bar  
+
+### Enable login locally
+
+```powershell
+$env:CLEARANCE_PASSWORD="mysecret"
+uvicorn app.main:app --port 8000
+```
+
+Then open http://127.0.0.1:8000
+
 ## Environment variables
 
 | Variable | Default | Purpose |
 | --- | --- | --- |
-| `CLEARANCE_PASSWORD` | empty | If set, login required for all API writes/reads (except health) |
+| `CLEARANCE_PASSWORD` | empty | If set, login required for all API writes/reads (except health/auth) |
 | `CLEARANCE_DEMO` | `true` | Show demo seed / samples / evals |
 | `CLEARANCE_MODE` | `mock` | `mock` rules or `llm` + OpenAI |
 | `OPENAI_API_KEY` | — | Vision / LLM extraction |

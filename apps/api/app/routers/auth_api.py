@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Response
+from fastapi import APIRouter, Request, Response
 from pydantic import BaseModel
 
-from app.auth import COOKIE, check_password, make_session_token
+from app.auth import COOKIE, check_password, make_session_token, session_valid
 from app.config import settings
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
@@ -19,13 +19,36 @@ async def auth_status():
         "auth_required": settings.auth_required,
         "demo_mode": settings.clearance_demo,
         "product": "Clearance",
+        "hint": (
+            "Set env CLEARANCE_PASSWORD to enable login"
+            if not settings.auth_required
+            else "Login required — POST /api/auth/login"
+        ),
+    }
+
+
+@router.get("/me")
+async def auth_me(request: Request):
+    """Public session probe (not gated). UI uses this to show login vs app."""
+    if not settings.auth_required:
+        return {
+            "auth_required": False,
+            "logged_in": True,
+            "mode": "open",
+        }
+    token = request.cookies.get(COOKIE)
+    ok = session_valid(token)
+    return {
+        "auth_required": True,
+        "logged_in": ok,
+        "mode": "password",
     }
 
 
 @router.post("/login")
 async def login(body: LoginBody, response: Response):
     if not settings.auth_required:
-        return {"ok": True, "auth_required": False}
+        return {"ok": True, "auth_required": False, "detail": "Open access — no password configured"}
     if not check_password(body.password):
         response.status_code = 401
         return {"ok": False, "detail": "Invalid password"}

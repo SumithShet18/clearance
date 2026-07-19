@@ -49,26 +49,49 @@ function showView(name) {
   $("#viewSettings").classList.toggle("hidden", name !== "settings");
 }
 
+let _booted = false;
+
 async function boot() {
-  const status = await api("/api/auth/status");
-  authRequired = !!status.auth_required;
+  // /api/auth/me is public — tells us if password mode is on and if cookie is valid
+  const me = await fetch("/api/auth/me", { credentials: "include" }).then((r) => r.json());
+  authRequired = !!me.auth_required;
+  demoMode = true;
+
+  const status = await fetch("/api/auth/status", { credentials: "include" }).then((r) =>
+    r.json()
+  );
   demoMode = !!status.demo_mode;
 
-  if (authRequired) {
-    $("#btnLogout").classList.remove("hidden");
-    try {
-      await api("/api/health");
-      showLogin(false);
-    } catch {
-      showLogin(true);
-      return;
-    }
-  } else {
+  // Open access (no CLEARANCE_PASSWORD): no login screen, no logout
+  if (!authRequired) {
     showLogin(false);
+    $("#btnLogout").classList.add("hidden");
+    const badge = $("#modeBadge");
+    if (badge && !badge.dataset.authNote) {
+      badge.dataset.authNote = "1";
+    }
+    await finishBoot("open");
+    return;
   }
 
+  // Password required: show login until session cookie is valid
+  if (!me.logged_in) {
+    showLogin(true);
+    $("#btnLogout").classList.add("hidden");
+    $("#loginHint").textContent = "Enter the workspace password (CLEARANCE_PASSWORD).";
+    wireLoginOnce();
+    return;
+  }
+
+  showLogin(false);
+  $("#btnLogout").classList.remove("hidden");
+  await finishBoot("password");
+}
+
+async function finishBoot(authMode) {
   const health = await api("/api/health");
-  $("#modeBadge").textContent = `mode: ${health.mode}`;
+  $("#modeBadge").textContent =
+    authMode === "open" ? `mode: ${health.mode} · open access` : `mode: ${health.mode} · signed in`;
   if (health.version) $("#verBadge").textContent = `v${health.version}`;
 
   if (demoMode) {
@@ -79,56 +102,73 @@ async function boot() {
     $("#samplesHead").classList.remove("hidden");
   }
 
-  $("#fileInput").addEventListener("change", onUpload);
-  $("#btnSeed").addEventListener("click", seedDemo);
-  $("#btnEval").addEventListener("click", runEval);
-  $("#btnBench").addEventListener("click", runBench);
-  $("#btnExportBills").addEventListener("click", exportBillsCsv);
-  $("#btnExportBills2").addEventListener("click", exportBillsCsv);
-  $("#btnNavInbox").addEventListener("click", () => {
-    showView("inbox");
-    refreshCases();
-  });
-  $("#btnNavBills").addEventListener("click", () => {
-    showView("bills");
-    loadBills();
-  });
-  $("#btnNavSettings").addEventListener("click", () => {
-    showView("settings");
-    loadSettings();
-  });
-  $("#btnSaveSettings").addEventListener("click", saveSettings);
+  if (!_booted) {
+    _booted = true;
+    $("#fileInput").addEventListener("change", onUpload);
+    $("#btnSeed").addEventListener("click", seedDemo);
+    $("#btnEval").addEventListener("click", runEval);
+    $("#btnBench").addEventListener("click", runBench);
+    $("#btnExportBills").addEventListener("click", exportBillsCsv);
+    $("#btnExportBills2").addEventListener("click", exportBillsCsv);
+    $("#btnNavInbox").addEventListener("click", () => {
+      showView("inbox");
+      refreshCases();
+    });
+    $("#btnNavBills").addEventListener("click", () => {
+      showView("bills");
+      loadBills();
+    });
+    $("#btnNavSettings").addEventListener("click", () => {
+      showView("settings");
+      loadSettings();
+    });
+    $("#btnSaveSettings").addEventListener("click", saveSettings);
+    $("#btnLogout").addEventListener("click", doLogout);
+    $("#caseSearch").addEventListener("input", (e) => {
+      filterQ = e.target.value.trim();
+      refreshCases();
+    });
+    document.querySelectorAll("#statusTabs .tab").forEach((tab) => {
+      tab.addEventListener("click", () => {
+        document.querySelectorAll("#statusTabs .tab").forEach((t) => t.classList.remove("active"));
+        tab.classList.add("active");
+        filterStatus = tab.dataset.status || "";
+        refreshCases();
+      });
+    });
+  }
+
+  wireLoginOnce();
+  await Promise.all([refreshMetrics(), refreshSamples(), refreshCases(), refreshBillCount()]);
+}
+
+function wireLoginOnce() {
+  if (wireLoginOnce._done) return;
+  wireLoginOnce._done = true;
   $("#btnLogin").addEventListener("click", doLogin);
   $("#loginPassword").addEventListener("keydown", (e) => {
     if (e.key === "Enter") doLogin();
   });
-  $("#btnLogout").addEventListener("click", doLogout);
-  $("#caseSearch").addEventListener("input", (e) => {
-    filterQ = e.target.value.trim();
-    refreshCases();
-  });
-  document.querySelectorAll("#statusTabs .tab").forEach((tab) => {
-    tab.addEventListener("click", () => {
-      document.querySelectorAll("#statusTabs .tab").forEach((t) => t.classList.remove("active"));
-      tab.classList.add("active");
-      filterStatus = tab.dataset.status || "";
-      refreshCases();
-    });
-  });
-
-  await Promise.all([refreshMetrics(), refreshSamples(), refreshCases(), refreshBillCount()]);
 }
 
 async function doLogin() {
   const password = $("#loginPassword").value;
+  $("#loginHint").textContent = "Signing in…";
   try {
-    const r = await api("/api/auth/login", {
+    const res = await fetch("/api/auth/login", {
       method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ password }),
     });
-    if (!r.ok) {
+    const r = await res.json().catch(() => ({}));
+    if (!res.ok || r.ok === false) {
       $("#loginHint").textContent = r.detail || "Invalid password";
       return;
+    }
+    if (!r.auth_required) {
+      $("#loginHint").textContent =
+        "Server has no password set (CLEARANCE_PASSWORD empty). Open access mode.";
     }
     showLogin(false);
     await boot();
@@ -138,9 +178,14 @@ async function doLogin() {
 }
 
 async function doLogout() {
-  await api("/api/auth/logout", { method: "POST" });
-  if (authRequired) showLogin(true);
+  await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
   toast("Signed out");
+  if (authRequired) {
+    showLogin(true);
+    $("#btnLogout").classList.add("hidden");
+    $("#loginPassword").value = "";
+    $("#loginHint").textContent = "Signed out. Enter password to continue.";
+  }
 }
 
 async function runBench() {

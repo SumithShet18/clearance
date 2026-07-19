@@ -17,3 +17,12 @@ services:
         value: mock
       - key: PORT
         value: "8000"
+      # Set in Render Dashboard → Environment to enable login/logout UI:
+      # CLEARANCE_PASSWORD = your-secret
+      - key: CLEARANCE_PASSWORD
+        sync: false
+      - key: CLEARANCE_DEMO
+        value: "true"
+      - key: SESSION_SECRET
+        generateValue: true
+
