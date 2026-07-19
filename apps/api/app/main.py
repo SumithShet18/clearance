@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
@@ -12,6 +14,13 @@ from app.db import init_db
 from app.routers import cases, evals
 from app.services.erp import MCP_TOOLS
 
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    await init_db()
+    yield
+
+
 app = FastAPI(
     title="Clearance",
     description=(
@@ -19,7 +28,9 @@ app = FastAPI(
         "HITL, MCP-shaped ERP writeback, and evals. Compose, don't reinvent control planes."
     ),
     version="0.1.0",
+    lifespan=lifespan,
 )
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -33,11 +44,6 @@ app.include_router(cases.router)
 app.include_router(evals.router)
 
 WEB_DIR = Path(__file__).resolve().parents[2] / "web"
-
-
-@app.on_event("startup")
-async def startup() -> None:
-    await init_db()
 
 
 @app.get("/api/health")

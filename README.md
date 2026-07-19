@@ -1,6 +1,12 @@
 # Clearance
 
+[![ci](https://github.com/SumithShet18/clearance/actions/workflows/ci.yml/badge.svg)](https://github.com/SumithShet18/clearance/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 **Agents that finish work — measured, governed, and reversible.**
+
+Portfolio project by [SumithShet18](https://github.com/SumithShet18) · Live code: [github.com/SumithShet18/clearance](https://github.com/SumithShet18/clearance)
+
 
 Clearance is a production-shaped **multi-agent document operations** system for AP invoices (v1): extract → validate → policy check → decide → human-in-the-loop → MCP-shaped ERP writeback → verify — with **offline gold evals** and full audit trails.
 

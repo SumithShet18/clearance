@@ -1,0 +1,29 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: pip install -r requirements.txt
+      - name: Unit + gold evals
+        run: pytest ../../evals/test_gold.py tests/test_pipeline.py -q
+      - name: API smoke
+        run: |
+          uvicorn app.main:app --host 127.0.0.1 --port 8000 &
+          sleep 2
+          curl -sf http://127.0.0.1:8000/api/health
+          curl -sf http://127.0.0.1:8000/api/evals/run | tee /tmp/eval.json
+          python -c "import json; d=json.load(open('/tmp/eval.json')); assert d['field_accuracy']>=0.75"
