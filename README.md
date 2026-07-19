@@ -40,14 +40,14 @@ A full-stack **multi-agent document ops product**:
 | **Agent pipeline** | Plan → extract → validate → policy → decide → (HITL) → act → verify |
 | **Governance** | Confidence thresholds, vendor/amount/currency policy, anomaly flags |
 | **Human-in-the-loop** | Exception queue: approve / reject before irreversible ERP write |
-| **Tools (MCP-shaped)** | `erp_create_bill`, `erp_flag_anomaly`, standalone MCP server |
+| **Tools (MCP-shaped)** | `erp_create_bill`, `erp_flag_anomaly` — in-process **or** `CLEARANCE_ERP=mcp` stdio process |
 | **Observability** | Per-step timeline + JSONL traces + audit export |
-| **Evaluation** | Offline gold sets + dual-track bench (synthetic + CORD receipts) |
-| **Ship** | Docker, CI, live HTTPS on Render |
+| **Evaluation** | Synthetic + **SROIE assisted/hard** + CORD; failure gallery |
+| **Ship** | Docker, CI, live HTTPS on Render, rate limit on public writes |
 
 **Resume line**
 
-> Built and deployed Clearance, a multi-agent document operations system that processes invoices/claims with policy checks, human-in-the-loop escalation, MCP-shaped ERP writeback, audit export, and measured evals. Live demo + dual-track benchmark. FastAPI, Docker, Render.
+> Built and deployed Clearance, a multi-agent document operations system that processes invoices/claims with policy checks, human-in-the-loop escalation, MCP ERP writeback (mock or stdio), audit export, and multi-track evals including honest OCR-hard SROIE. Live demo. FastAPI, Docker, Render.
 
 ---
 
@@ -140,12 +140,13 @@ From **[evals/REPORT.md](evals/REPORT.md)**:
 | Track | What | Result |
 | --- | --- | --- |
 | Synthetic stress (50) | Field accuracy | **~97.5%** micro |
-| **ICDAR SROIE real receipts (50)** | Public labels + OCR transcripts | **~98%** micro (vendor ~92%) |
+| SROIE assisted (50) | Labels + OCR + labeled footer | **~98%** micro (format-assisted) |
+| **SROIE hard / OCR-only (50)** | Footer stripped | **~79.5%** micro (vendor ~66%, total ~52%) |
 | CORD v2 fixtures (25) | HF ground-truth renders | **~100%** micro |
 | Pipeline subset (25) | Auto-acted vs HITL | **~52% STP / ~48% HITL** |
 
 STP &lt; 100% is intentional: governance should *not* auto-post high-risk cases.  
-SROIE is a **real public competition dataset** — not only synthetic demos. Full tables: [evals/REPORT.md](evals/REPORT.md).
+**Hard SROIE** is the credibility track — assisted ~98% is partly label-line helped. Miss gallery: [evals/results/failures.md](evals/results/failures.md). Full tables: [evals/REPORT.md](evals/REPORT.md).
 
 ---
 
@@ -160,7 +161,16 @@ SROIE is a **real public competition dataset** — not only synthetic demos. Ful
 | Eval | Custom gold sets + benchmark CLI |
 | Deploy | Docker, Render free tier, GitHub Actions CI |
 
-Optional: `CLEARANCE_MODE=llm` + `OPENAI_API_KEY` for LLM/vision extraction (default **mock** = free, offline, CI-stable).
+### Environment flags
+
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `CLEARANCE_MODE` | `mock` | `mock` \| `llm` extraction |
+| `OPENAI_API_KEY` | — | Required for `llm` / vision |
+| `CLEARANCE_ERP` | `mock` | `mock` in-process \| `mcp` stdio → `mcp-servers/erp` |
+| `RATE_LIMIT_PER_MINUTE` | `30` | Mutating API calls per IP (public demo) |
+| `DEMO_API_KEY` | — | Optional `X-Clearance-Key` bypass / gate |
+| `REQUIRE_DEMO_KEY` | `false` | If true + key set, writes need the header |
 
 ---
 
@@ -175,13 +185,15 @@ clearance/
 ├── samples/
 │   ├── invoice_*.txt         ← AP demo cases
 │   ├── claims/               ← insurance FNOL demo cases
+│   ├── sroie/ · sroie_hard/  ← real receipts (assisted + OCR-only)
 │   ├── cord/                 ← CORD receipt text fixtures
 │   └── synthetic/            ← 50-doc bench corpus
 ├── evals/
 │   ├── REPORT.md             ← published benchmark numbers
+│   ├── results/failures.md   ← miss gallery
 │   ├── run_benchmark.py      ← Clearance Bench CLI
 │   ├── gold/                 ← labels
-│   └── datasets/             ← synthetic generator + CORD loader
+│   └── datasets/             ← synthetic / SROIE / CORD loaders
 ├── mcp-servers/erp/          ← standalone MCP ERP tools
 ├── docs/
 │   ├── USE_CASES.md          ← real-world use cases
@@ -217,6 +229,12 @@ pytest -q
 # benchmark
 # from repo root, PYTHONPATH=. 
 python evals/run_benchmark.py --source synthetic --limit 50 --pipeline
+python evals/run_benchmark.py --source sroie-hard --limit 50
+python evals/write_real_report.py
+python evals/write_failures.py
+
+# optional: ERP via MCP stdio process
+# CLEARANCE_ERP=mcp uvicorn app.main:app --port 8000
 ```
 
 ---

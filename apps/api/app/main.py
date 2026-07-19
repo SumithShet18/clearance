@@ -11,6 +11,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app.config import settings
 from app.db import init_db
+from app.middleware_rate_limit import RateLimitMiddleware
 from app.routers import cases, evals
 from app.services.erp import MCP_TOOLS
 
@@ -27,13 +28,9 @@ app = FastAPI(
         "Production multi-agent document operations — extract, validate, policy-check, "
         "HITL, MCP-shaped ERP writeback, and evals. Compose, don't reinvent control planes."
     ),
-    version="0.4.0",
+    version="0.5.0",
     lifespan=lifespan,
 )
-
-
-
-
 
 app.add_middleware(
     CORSMiddleware,
@@ -42,6 +39,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.add_middleware(RateLimitMiddleware)
 
 app.include_router(cases.router)
 app.include_router(evals.router)
@@ -54,30 +52,32 @@ async def health():
     return {
         "status": "ok",
         "mode": "llm" if settings.use_llm else "mock",
+        "erp": settings.erp_backend,
+        "rate_limit_per_minute": settings.rate_limit_per_minute,
         "hitl_threshold": settings.confidence_hitl_threshold,
         "product": "Clearance",
-        "version": "0.4.0",
+        "version": "0.5.0",
         "skills": [
             "HITL",
             "MCP-tools",
+            "MCP-stdio-ERP",
             "gold-evals",
+            "sroie-hard-bench",
             "audit-export",
             "demo-seed",
             "clearance-bench",
             "jsonl-traces",
             "vision-upload",
             "claims-pack",
+            "rate-limit",
         ],
     }
 
 
-
-
-
 @app.get("/api/tools")
 async def tools():
-    """MCP-shaped tool catalog (Phase 1: in-process mock ERP)."""
-    return {"tools": MCP_TOOLS}
+    """MCP-shaped tool catalog; runtime backend is settings.erp_backend (mock|mcp)."""
+    return {"tools": MCP_TOOLS, "backend": settings.erp_backend}
 
 
 @app.get("/api/samples")

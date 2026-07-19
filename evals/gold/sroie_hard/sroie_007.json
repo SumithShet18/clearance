@@ -1,0 +1,19 @@
+{
+  "sample": "sroie_hard/sroie_007.txt",
+  "expected": {
+    "vendor_name": "S.H.H. MOTOR (SUNGAI RENGIT) SDN. BHD.",
+    "invoice_number": "",
+    "invoice_date": "23-01-2019",
+    "currency": "USD",
+    "total": 20.0,
+    "line_items": []
+  },
+  "id": "sroie-hard-007",
+  "source": "sroie_hard",
+  "meta": {
+    "dataset": "ICDAR-2019-SROIE",
+    "address": "NO. 343, JALAN KURAU, SUNGAI RENGIT, 81620 PENGERANG, JOHOR.",
+    "mode": "ocr_only",
+    "note": "Assisted footer stripped; invoice_number not scored"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "sample": "sroie_hard/sroie_048.txt",
+  "expected": {
+    "vendor_name": "YONG TAT HARDWARE TRADING",
+    "invoice_number": "",
+    "invoice_date": "13/03/2018",
+    "currency": "USD",
+    "total": 100.9,
+    "line_items": []
+  },
+  "id": "sroie-hard-048",
+  "source": "sroie_hard",
+  "meta": {
+    "dataset": "ICDAR-2019-SROIE",
+    "address": "NO 4,JALAN PERJIRANAN 10, TAMAN AIR BIRU, 81700 PASIR GUDANG, JOHOR.",
+    "mode": "ocr_only",
+    "note": "Assisted footer stripped; invoice_number not scored"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "sample": "sroie_hard/sroie_038.txt",
+  "expected": {
+    "vendor_name": "YHM AEON TEBRAU CITY",
+    "invoice_number": "",
+    "invoice_date": "11/03/2018",
+    "currency": "USD",
+    "total": 13.1,
+    "line_items": []
+  },
+  "id": "sroie-hard-038",
+  "source": "sroie_hard",
+  "meta": {
+    "dataset": "ICDAR-2019-SROIE",
+    "address": "S117, SECOND FLOOR, AEON TEBRAU CITY, 1, JALAN DESA TEBRAU, TAMAN DESA TEBRAU, 81100 JOHOR BAHRU, JOHOR.",
+    "mode": "ocr_only",
+    "note": "Assisted footer stripped; invoice_number not scored"
+  }
+}

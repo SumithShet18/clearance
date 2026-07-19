@@ -43,3 +43,30 @@ def test_synthetic_generate_and_extract_accuracy(tmp_path, monkeypatch):
     result = run_extract_bench(golds)
     assert result["cases"] >= 10
     assert result["micro_field_accuracy"] >= 0.95
+
+
+def test_sroie_hard_strips_assist_footer():
+    from evals.datasets.sroie_loader import load_sroie, strip_assist_footer
+
+    sample = (
+        "ACME STORE\nTOTAL: 12.50\n"
+        "Vendor: ACME STORE\nInvoice Number: SROIE-99\nInvoice Date: 01/01/2020\n"
+        "Currency: USD\nAddress: 1 Main\nTotal: 12.50\n"
+    )
+    body = strip_assist_footer(sample)
+    assert "Vendor: ACME STORE" not in body
+    assert "Invoice Number: SROIE-99" not in body
+    assert "TOTAL: 12.50" in body
+
+    hard = load_sroie(limit=5, cache=True, ocr_only=True)
+    if not hard:
+        hard = load_sroie(limit=5, cache=False, ocr_only=True)
+    assert len(hard) >= 1
+    path = ROOT / hard[0].sample_path
+    assert path.exists()
+    text = path.read_text(encoding="utf-8")
+    assert "Invoice Number: SROIE-" not in text
+    # Hard track is intentionally harder than assisted — just smoke that it runs
+    result = run_extract_bench(hard)
+    assert result["cases"] >= 1
+    assert 0.0 <= result["micro_field_accuracy"] <= 1.0

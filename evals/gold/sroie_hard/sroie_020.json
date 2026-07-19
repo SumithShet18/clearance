@@ -1,0 +1,19 @@
+{
+  "sample": "sroie_hard/sroie_020.txt",
+  "expected": {
+    "vendor_name": "SYL ROASTED DELIGHTS SDN. BHD.",
+    "invoice_number": "",
+    "invoice_date": "06/03/2018",
+    "currency": "USD",
+    "total": 54.5,
+    "line_items": []
+  },
+  "id": "sroie-hard-020",
+  "source": "sroie_hard",
+  "meta": {
+    "dataset": "ICDAR-2019-SROIE",
+    "address": "75. JALAN SS 22/19, DAMANSARA JAYA, 47400 PJ",
+    "mode": "ocr_only",
+    "note": "Assisted footer stripped; invoice_number not scored"
+  }
+}

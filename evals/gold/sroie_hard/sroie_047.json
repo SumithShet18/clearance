@@ -1,0 +1,19 @@
+{
+  "sample": "sroie_hard/sroie_047.txt",
+  "expected": {
+    "vendor_name": "RESTAURANT SIN DU",
+    "invoice_number": "",
+    "invoice_date": "09/03/2018",
+    "currency": "USD",
+    "total": 170.0,
+    "line_items": []
+  },
+  "id": "sroie-hard-047",
+  "source": "sroie_hard",
+  "meta": {
+    "dataset": "ICDAR-2019-SROIE",
+    "address": "K3-113, JL IBRAHIM SULTAN 80300 JOHOR BAHRU JOHOR",
+    "mode": "ocr_only",
+    "note": "Assisted footer stripped; invoice_number not scored"
+  }
+}

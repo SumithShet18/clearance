@@ -1,0 +1,19 @@
+{
+  "sample": "sroie_hard/sroie_009.txt",
+  "expected": {
+    "vendor_name": "GERBANG ALAF RESTAURANTS SDN BHD",
+    "invoice_number": "",
+    "invoice_date": "18/01/2018",
+    "currency": "USD",
+    "total": 26.6,
+    "line_items": []
+  },
+  "id": "sroie-hard-009",
+  "source": "sroie_hard",
+  "meta": {
+    "dataset": "ICDAR-2019-SROIE",
+    "address": "LEVEL 6, BANGUNAN TH, DAMANSARA UPTOWN3 NO.3, JALAN SS21/39,47400 PETALING JAYA SELANGOR",
+    "mode": "ocr_only",
+    "note": "Assisted footer stripped; invoice_number not scored"
+  }
+}

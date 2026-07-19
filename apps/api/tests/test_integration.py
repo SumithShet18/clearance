@@ -115,3 +115,53 @@ def test_flag_anomaly_tool():
     assert anomaly["reason"] == "duplicate risk"
     assert list_anomalies()
     assert any(b.id == bill.id for b in list_bills())
+
+
+@pytest.mark.asyncio
+async def test_health_reports_erp_and_rate_limit():
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        h = await client.get("/api/health")
+        body = h.json()
+        assert body["erp"] in {"mock", "mcp"}
+        assert "rate_limit_per_minute" in body
+        tools = await client.get("/api/tools")
+        assert tools.json().get("backend") in {"mock", "mcp"}
+
+
+def test_mcp_erp_backend_create_bill(monkeypatch):
+    """CLEARANCE_ERP=mcp routes create_bill through mcp-servers/erp/server.py stdio."""
+    from app.config import settings
+    from app.services import erp as erp_mod
+
+    monkeypatch.setattr(settings, "clearance_erp", "mcp")
+    erp_mod.reset_erp_state()
+    try:
+        bill = create_bill("MCP Vendor", "INV-MCP-1", 42.5, "USD")
+        assert bill.id.startswith("BILL-")
+        assert bill.vendor_name == "MCP Vendor"
+        assert bill.total == 42.5
+    finally:
+        monkeypatch.setattr(settings, "clearance_erp", "mock")
+        erp_mod.reset_erp_state()
+
+
+@pytest.mark.asyncio
+async def test_rate_limit_trips_on_burst(monkeypatch):
+    from app.config import settings
+    from app.middleware_rate_limit import reset_rate_limit_state
+
+    monkeypatch.setattr(settings, "rate_limit_per_minute", 3)
+    monkeypatch.setattr(settings, "require_demo_key", False)
+    monkeypatch.setattr(settings, "demo_api_key", "")
+    reset_rate_limit_state()
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        codes = []
+        for _ in range(5):
+            r = await client.post("/api/cases/from-sample/invoice_acme_clean.txt")
+            codes.append(r.status_code)
+        assert 429 in codes
+        assert codes.count(200) + codes.count(201) >= 1
+    reset_rate_limit_state()
+    monkeypatch.setattr(settings, "rate_limit_per_minute", 30)

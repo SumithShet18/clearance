@@ -1,0 +1,19 @@
+{
+  "sample": "sroie_hard/sroie_015.txt",
+  "expected": {
+    "vendor_name": "HOME MASTER HARDWARE & ELECTRICAL",
+    "invoice_number": "",
+    "invoice_date": "22/12/2017",
+    "currency": "USD",
+    "total": 15.9,
+    "line_items": []
+  },
+  "id": "sroie-hard-015",
+  "source": "sroie_hard",
+  "meta": {
+    "dataset": "ICDAR-2019-SROIE",
+    "address": "NO.113G & 115G, JALAN SETIA GEMBILANG U13/BG BANDAR SETIA ALAM, 40170 BANDAR SETIA ALAM, SELANGOR.",
+    "mode": "ocr_only",
+    "note": "Assisted footer stripped; invoice_number not scored"
+  }
+}

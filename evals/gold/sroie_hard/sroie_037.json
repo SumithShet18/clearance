@@ -1,0 +1,19 @@
+{
+  "sample": "sroie_hard/sroie_037.txt",
+  "expected": {
+    "vendor_name": "WARAKUYA PERMAS CITY SDN BHD",
+    "invoice_number": "",
+    "invoice_date": "10/03/2018",
+    "currency": "USD",
+    "total": 57.8,
+    "line_items": []
+  },
+  "id": "sroie-hard-037",
+  "source": "sroie_hard",
+  "meta": {
+    "dataset": "ICDAR-2019-SROIE",
+    "address": "JALAN PERMAS UTARA 1 PERMAS JAYA 81750 MASAI JOHOR",
+    "mode": "ocr_only",
+    "note": "Assisted footer stripped; invoice_number not scored"
+  }
+}

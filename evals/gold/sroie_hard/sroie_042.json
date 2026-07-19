@@ -1,0 +1,19 @@
+{
+  "sample": "sroie_hard/sroie_042.txt",
+  "expected": {
+    "vendor_name": "TASTE OF THE WORLD SDN BHD",
+    "invoice_number": "",
+    "invoice_date": "5/3/2018",
+    "currency": "USD",
+    "total": 64.15,
+    "line_items": []
+  },
+  "id": "sroie-hard-042",
+  "source": "sroie_hard",
+  "meta": {
+    "dataset": "ICDAR-2019-SROIE",
+    "address": "LOT 38, 39 101 BOULEVARD, JALAN KENARI 5, BANDAR PUCHONG JAYA, 47170 PUCHONG, SELANGOR",
+    "mode": "ocr_only",
+    "note": "Assisted footer stripped; invoice_number not scored"
+  }
+}

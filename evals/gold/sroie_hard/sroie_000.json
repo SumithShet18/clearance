@@ -1,0 +1,19 @@
+{
+  "sample": "sroie_hard/sroie_000.txt",
+  "expected": {
+    "vendor_name": "BOOK TA .K (TAMAN DAYA) SDN BHD",
+    "invoice_number": "",
+    "invoice_date": "25/12/2018",
+    "currency": "USD",
+    "total": 9.0,
+    "line_items": []
+  },
+  "id": "sroie-hard-000",
+  "source": "sroie_hard",
+  "meta": {
+    "dataset": "ICDAR-2019-SROIE",
+    "address": "NO.53 55,57 & 59, JALAN SAGU 18, TAMAN DAYA, 81100 JOHOR BAHRU, JOHOR.",
+    "mode": "ocr_only",
+    "note": "Assisted footer stripped; invoice_number not scored"
+  }
+}

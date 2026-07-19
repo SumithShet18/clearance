@@ -55,6 +55,10 @@ def load_golds(source: str, limit: int | None) -> list[GoldInvoice]:
         from evals.datasets.sroie_loader import load_sroie
 
         return load_sroie(limit=limit or 50)
+    if source in {"sroie-hard", "sroie_hard", "sroie_ocr"}:
+        from evals.datasets.sroie_loader import load_sroie
+
+        return load_sroie(limit=limit or 50, ocr_only=True)
     if source == "all":
         g = load_manual_golds() + load_synthetic_golds(None)
         try:
@@ -216,7 +220,7 @@ def main() -> None:
     p.add_argument(
         "--source",
         default="synthetic",
-        choices=["synthetic", "manual", "cord", "sroie", "all"],
+        choices=["synthetic", "manual", "cord", "sroie", "sroie-hard", "all"],
     )
     p.add_argument("--limit", type=int, default=50)
     p.add_argument("--regenerate", action="store_true", help="Regenerate synthetic corpus")

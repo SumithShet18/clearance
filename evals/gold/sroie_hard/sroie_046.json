@@ -1,0 +1,19 @@
+{
+  "sample": "sroie_hard/sroie_046.txt",
+  "expected": {
+    "vendor_name": "PASAR MINI JIN SENG",
+    "invoice_number": "",
+    "invoice_date": "18/03/18",
+    "currency": "USD",
+    "total": 28.6,
+    "line_items": []
+  },
+  "id": "sroie-hard-046",
+  "source": "sroie_hard",
+  "meta": {
+    "dataset": "ICDAR-2019-SROIE",
+    "address": "379, JALAN PERMAS SATU, BANDAR BARU PERMAS JAYA 81750 PLENTONG, JOHOR.",
+    "mode": "ocr_only",
+    "note": "Assisted footer stripped; invoice_number not scored"
+  }
+}

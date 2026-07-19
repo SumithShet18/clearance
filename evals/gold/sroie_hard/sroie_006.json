@@ -1,0 +1,19 @@
+{
+  "sample": "sroie_hard/sroie_006.txt",
+  "expected": {
+    "vendor_name": "SOON HUAT MACHINERY ENTERPRISE",
+    "invoice_number": "",
+    "invoice_date": "11/01/2019",
+    "currency": "USD",
+    "total": 327.0,
+    "line_items": []
+  },
+  "id": "sroie-hard-006",
+  "source": "sroie_hard",
+  "meta": {
+    "dataset": "ICDAR-2019-SROIE",
+    "address": "NO.53 JALAN PUTRA 1, TAMAN SRI PUTRA, 81200 JOHOR BAHRU JOHOR",
+    "mode": "ocr_only",
+    "note": "Assisted footer stripped; invoice_number not scored"
+  }
+}

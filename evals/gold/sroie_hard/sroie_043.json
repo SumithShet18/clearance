@@ -1,0 +1,19 @@
+{
+  "sample": "sroie_hard/sroie_043.txt",
+  "expected": {
+    "vendor_name": "32 PUB & BISTRO OWN BY CNU TRADING",
+    "invoice_number": "",
+    "invoice_date": "10-03-2018",
+    "currency": "USD",
+    "total": 190.0,
+    "line_items": []
+  },
+  "id": "sroie-hard-043",
+  "source": "sroie_hard",
+  "meta": {
+    "dataset": "ICDAR-2019-SROIE",
+    "address": "78G, JALAN SS21/62, DAMANSARA UTAMA, 47400 PETALING JAYA.",
+    "mode": "ocr_only",
+    "note": "Assisted footer stripped; invoice_number not scored"
+  }
+}

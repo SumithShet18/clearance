@@ -1,0 +1,19 @@
+{
+  "sample": "sroie_hard/sroie_011.txt",
+  "expected": {
+    "vendor_name": "AIK HUAT HARDWARE ENTERPRISE (SETIA ALAM) SDN BHD",
+    "invoice_number": "",
+    "invoice_date": "15/06/2017",
+    "currency": "USD",
+    "total": 15.0,
+    "line_items": []
+  },
+  "id": "sroie-hard-011",
+  "source": "sroie_hard",
+  "meta": {
+    "dataset": "ICDAR-2019-SROIE",
+    "address": "NO. 17-G, JALAN SETIA INDAH (X) U13/X, SETIA ALAM, SEKSYEN U13, 40170 SHAH ALAM,",
+    "mode": "ocr_only",
+    "note": "Assisted footer stripped; invoice_number not scored"
+  }
+}

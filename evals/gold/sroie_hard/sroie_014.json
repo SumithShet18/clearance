@@ -1,0 +1,19 @@
+{
+  "sample": "sroie_hard/sroie_014.txt",
+  "expected": {
+    "vendor_name": "ASIA MART",
+    "invoice_number": "",
+    "invoice_date": "22/12/2017",
+    "currency": "USD",
+    "total": 32.7,
+    "line_items": []
+  },
+  "id": "sroie-hard-014",
+  "source": "sroie_hard",
+  "meta": {
+    "dataset": "ICDAR-2019-SROIE",
+    "address": "NO.23 BATU 10, TAMAN SENTOSA, JALAN KAPAR, 42200 KLANG, SELANGOR.",
+    "mode": "ocr_only",
+    "note": "Assisted footer stripped; invoice_number not scored"
+  }
+}

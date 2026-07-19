@@ -1,0 +1,19 @@
+{
+  "sample": "sroie_hard/sroie_010.txt",
+  "expected": {
+    "vendor_name": "SAM SAM TRADING CO",
+    "invoice_number": "",
+    "invoice_date": "29-12-2017",
+    "currency": "USD",
+    "total": 14.1,
+    "line_items": []
+  },
+  "id": "sroie-hard-010",
+  "source": "sroie_hard",
+  "meta": {
+    "dataset": "ICDAR-2019-SROIE",
+    "address": "67,JLN MEWAH 25/63 TMN SRI MUDA, 40400 SHAH ALAM.",
+    "mode": "ocr_only",
+    "note": "Assisted footer stripped; invoice_number not scored"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "sample": "sroie_hard/sroie_004.txt",
+  "expected": {
+    "vendor_name": "MR D.I.Y. (M) SDN BHD",
+    "invoice_number": "",
+    "invoice_date": "18-11-18",
+    "currency": "USD",
+    "total": 30.9,
+    "line_items": []
+  },
+  "id": "sroie-hard-004",
+  "source": "sroie_hard",
+  "meta": {
+    "dataset": "ICDAR-2019-SROIE",
+    "address": "LOT 1851-A & 1851-B, JALAN KPB 6, KAWASAN PERINDUSTRIAN BALAKONG, 43300 SERI KEMBANGAN, SELANGOR (TESCO PUTRA NILAI)",
+    "mode": "ocr_only",
+    "note": "Assisted footer stripped; invoice_number not scored"
+  }
+}

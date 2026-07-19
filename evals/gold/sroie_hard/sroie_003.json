@@ -1,0 +1,19 @@
+{
+  "sample": "sroie_hard/sroie_003.txt",
+  "expected": {
+    "vendor_name": "YONGFATT ENTERPRISE",
+    "invoice_number": "",
+    "invoice_date": "25/12/2018",
+    "currency": "USD",
+    "total": 80.9,
+    "line_items": []
+  },
+  "id": "sroie-hard-003",
+  "source": "sroie_hard",
+  "meta": {
+    "dataset": "ICDAR-2019-SROIE",
+    "address": "NO 122.124. JALAN DEDAP 13 81100 JOHOR BAHRU",
+    "mode": "ocr_only",
+    "note": "Assisted footer stripped; invoice_number not scored"
+  }
+}
