@@ -1,0 +1,17 @@
+{
+  "sample": "sroie/sroie_005.txt",
+  "expected": {
+    "vendor_name": "ABC HO TRADING",
+    "invoice_number": "SROIE-005",
+    "invoice_date": "09/01/2019",
+    "currency": "USD",
+    "total": 31.0,
+    "line_items": []
+  },
+  "id": "sroie-005",
+  "source": "sroie",
+  "meta": {
+    "dataset": "ICDAR-2019-SROIE",
+    "address": "NO.2&4, JALAN HARMONI 3/2, TAMAN DESA HARMONI. 81100 JOHOR BAHRU JOHOR"
+  }
+}

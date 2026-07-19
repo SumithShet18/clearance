@@ -20,7 +20,7 @@ I designed, implemented, evaluated, and deployed a **multi-agent document operat
 | Agent system | Multi-step pipeline, task/progress ledgers, policy engine |
 | Tools | MCP-shaped ERP tools + standalone stdio MCP server |
 | Frontend | Operator UI: inbox, timeline, HITL, metrics, bench, export |
-| Quality | Gold sets, synthetic generator, CORD fixtures, REPORT.md |
+| Quality | Gold sets, synthetic generator, **ICDAR SROIE real receipts**, CORD fixtures, REPORT.md |
 | Observability | Step timeline + JSONL spans per case |
 | DevEx | Docker, Render blueprint, GitHub Actions CI, tests |
 | Docs | Recruiter README, use cases, demo script, architecture |

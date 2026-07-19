@@ -1,0 +1,17 @@
+{
+  "sample": "sroie/sroie_019.txt",
+  "expected": {
+    "vendor_name": "SHELL ISNI PETRO TRADING",
+    "invoice_number": "SROIE-019",
+    "invoice_date": "18/03/18",
+    "currency": "USD",
+    "total": 86.0,
+    "line_items": []
+  },
+  "id": "sroie-019",
+  "source": "sroie",
+  "meta": {
+    "dataset": "ICDAR-2019-SROIE",
+    "address": "LOT 2685 JLN GENTING KLANG 53300 KL SITE 1066"
+  }
+}

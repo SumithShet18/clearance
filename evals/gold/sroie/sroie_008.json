@@ -1,0 +1,17 @@
+{
+  "sample": "sroie/sroie_008.txt",
+  "expected": {
+    "vendor_name": "PERNIAGAAN ZHENG HUI",
+    "invoice_number": "SROIE-008",
+    "invoice_date": "12/02/2018",
+    "currency": "USD",
+    "total": 112.45,
+    "line_items": []
+  },
+  "id": "sroie-008",
+  "source": "sroie",
+  "meta": {
+    "dataset": "ICDAR-2019-SROIE",
+    "address": "NO.59 JALAN PERMAS 9/5 BANDAR BARU PERMAS JAYA 81760 JOHOR BAHRU"
+  }
+}

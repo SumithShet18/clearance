@@ -1,0 +1,17 @@
+{
+  "sample": "sroie/sroie_039.txt",
+  "expected": {
+    "vendor_name": "OWNER BY CASTLE BLUE S/B",
+    "invoice_number": "SROIE-039",
+    "invoice_date": "30/03/2018",
+    "currency": "USD",
+    "total": 189.75,
+    "line_items": []
+  },
+  "id": "sroie-039",
+  "source": "sroie",
+  "meta": {
+    "dataset": "ICDAR-2019-SROIE",
+    "address": "AVTIVO PLAZA,LOT B-F-11, BLOCK B NO1.JALAN PJU 9/1,D'SARA AVEVUE BANDAR SRI D'SARA, 52000 KL"
+  }
+}

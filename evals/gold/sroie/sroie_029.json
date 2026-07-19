@@ -1,0 +1,17 @@
+{
+  "sample": "sroie/sroie_029.txt",
+  "expected": {
+    "vendor_name": "C W KHOO HARDWARE SDN BHD",
+    "invoice_number": "SROIE-029",
+    "invoice_date": "01-03-18",
+    "currency": "USD",
+    "total": 21.2,
+    "line_items": []
+  },
+  "id": "sroie-029",
+  "source": "sroie",
+  "meta": {
+    "dataset": "ICDAR-2019-SROIE",
+    "address": "NO.50,JALAN PBS 14/11, KAWASAN PERINDUSTRIAN BUKIT SERDANG,"
+  }
+}

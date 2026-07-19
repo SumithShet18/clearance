@@ -1,0 +1,17 @@
+{
+  "sample": "sroie/sroie_021.txt",
+  "expected": {
+    "vendor_name": "TEO HENG STATIONERY & BOOKS",
+    "invoice_number": "SROIE-021",
+    "invoice_date": "18/01/2018",
+    "currency": "USD",
+    "total": 4.9,
+    "line_items": []
+  },
+  "id": "sroie-021",
+  "source": "sroie",
+  "meta": {
+    "dataset": "ICDAR-2019-SROIE",
+    "address": "NO. 53, JALAN BESAR, 45600 BATANG BERJUNTAI SELANGOR DARUL EHSAN"
+  }
+}

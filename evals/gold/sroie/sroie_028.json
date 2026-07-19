@@ -1,0 +1,17 @@
+{
+  "sample": "sroie/sroie_028.txt",
+  "expected": {
+    "vendor_name": "99 SPEED MART S/B",
+    "invoice_number": "SROIE-028",
+    "invoice_date": "24-01-18",
+    "currency": "USD",
+    "total": 2.5,
+    "line_items": []
+  },
+  "id": "sroie-028",
+  "source": "sroie",
+  "meta": {
+    "dataset": "ICDAR-2019-SROIE",
+    "address": "LOT P.T. 2811, JALAN ANGSA, TAMAN BERKELEY 41150 KLANG, SELANGOR 1076-IJOK"
+  }
+}

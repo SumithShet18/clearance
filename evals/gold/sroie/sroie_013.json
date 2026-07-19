@@ -1,0 +1,17 @@
+{
+  "sample": "sroie/sroie_013.txt",
+  "expected": {
+    "vendor_name": "RESTORAN HASSANBISTRO",
+    "invoice_number": "SROIE-013",
+    "invoice_date": "12/28/2017",
+    "currency": "USD",
+    "total": 15.0,
+    "line_items": []
+  },
+  "id": "sroie-013",
+  "source": "sroie",
+  "meta": {
+    "dataset": "ICDAR-2019-SROIE",
+    "address": "NO.2-1-1 JALAN SEITA PRIMA Q U 13/Q SEITA ALAM 40170 SHAN ALAM SELANGOR"
+  }
+}

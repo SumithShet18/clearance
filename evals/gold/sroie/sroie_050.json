@@ -1,0 +1,17 @@
+{
+  "sample": "sroie/sroie_050.txt",
+  "expected": {
+    "vendor_name": "TIMELESS KITCHENETTE SDN BHD",
+    "invoice_number": "SROIE-050",
+    "invoice_date": "2018-03-23",
+    "currency": "USD",
+    "total": 593.1,
+    "line_items": []
+  },
+  "id": "sroie-050",
+  "source": "sroie",
+  "meta": {
+    "dataset": "ICDAR-2019-SROIE",
+    "address": "LOT 50, FLOOR T2,SKY AVENUE GENTING HIGHLANDS PAHANG, 69000 PAHANG MALAYSIA"
+  }
+}

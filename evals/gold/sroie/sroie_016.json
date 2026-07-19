@@ -1,0 +1,17 @@
+{
+  "sample": "sroie/sroie_016.txt",
+  "expected": {
+    "vendor_name": "LIGHTROOM GALLERY SDN BHD",
+    "invoice_number": "SROIE-016",
+    "invoice_date": "20/12/2017",
+    "currency": "USD",
+    "total": 73.0,
+    "line_items": []
+  },
+  "id": "sroie-016",
+  "source": "sroie",
+  "meta": {
+    "dataset": "ICDAR-2019-SROIE",
+    "address": "NO: 28, JALAN ASTANA 1C, BANDAR BUKIT RAJA, 41050 KLANG SELANGOR D.E, MALAYSIA"
+  }
+}

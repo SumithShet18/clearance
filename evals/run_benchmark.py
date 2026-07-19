@@ -51,8 +51,18 @@ def load_golds(source: str, limit: int | None) -> list[GoldInvoice]:
         from evals.datasets.cord_loader import load_cord
 
         return load_cord(limit=limit or 50)
+    if source == "sroie":
+        from evals.datasets.sroie_loader import load_sroie
+
+        return load_sroie(limit=limit or 50)
     if source == "all":
         g = load_manual_golds() + load_synthetic_golds(None)
+        try:
+            from evals.datasets.sroie_loader import load_sroie
+
+            g += load_sroie(limit=min(limit or 50, 50))
+        except Exception:
+            pass
         try:
             from evals.datasets.cord_loader import load_cord
 
@@ -203,7 +213,11 @@ def write_report(result: dict, pipeline: dict | None) -> None:
 
 def main() -> None:
     p = argparse.ArgumentParser(description="Clearance Bench")
-    p.add_argument("--source", default="synthetic", choices=["synthetic", "manual", "cord", "all"])
+    p.add_argument(
+        "--source",
+        default="synthetic",
+        choices=["synthetic", "manual", "cord", "sroie", "all"],
+    )
     p.add_argument("--limit", type=int, default=50)
     p.add_argument("--regenerate", action="store_true", help="Regenerate synthetic corpus")
     p.add_argument("--pipeline", action="store_true", help="Also run full agent pipeline subset")

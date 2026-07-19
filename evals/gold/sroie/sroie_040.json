@@ -1,0 +1,17 @@
+{
+  "sample": "sroie/sroie_040.txt",
+  "expected": {
+    "vendor_name": "THREE STOOGES",
+    "invoice_number": "SROIE-040",
+    "invoice_date": "12/03/2018",
+    "currency": "USD",
+    "total": 343.95,
+    "line_items": []
+  },
+  "id": "sroie-040",
+  "source": "sroie",
+  "meta": {
+    "dataset": "ICDAR-2019-SROIE",
+    "address": "109, SS21/1A, DAMANSARA UTAMA"
+  }
+}

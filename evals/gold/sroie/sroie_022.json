@@ -1,0 +1,17 @@
+{
+  "sample": "sroie/sroie_022.txt",
+  "expected": {
+    "vendor_name": "FUYI MINI MARKET",
+    "invoice_number": "SROIE-022",
+    "invoice_date": "25/01/2018",
+    "currency": "USD",
+    "total": 9.0,
+    "line_items": []
+  },
+  "id": "sroie-022",
+  "source": "sroie",
+  "meta": {
+    "dataset": "ICDAR-2019-SROIE",
+    "address": "NO 43-45-47G, TAMAN SEJATI, IJOK, 45600 BESTARI JAYA, KUALA SELANGOR."
+  }
+}

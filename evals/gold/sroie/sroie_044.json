@@ -1,0 +1,17 @@
+{
+  "sample": "sroie/sroie_044.txt",
+  "expected": {
+    "vendor_name": "UNIHAKKA INTERNATIONAL SDN BHD",
+    "invoice_number": "SROIE-044",
+    "invoice_date": "18 MAR 2018",
+    "currency": "USD",
+    "total": 8.6,
+    "line_items": []
+  },
+  "id": "sroie-044",
+  "source": "sroie",
+  "meta": {
+    "dataset": "ICDAR-2019-SROIE",
+    "address": "12, JALAN TAMPOI 7/4,KAWASAN PARINDUSTRIAN TAMPOI,81200 JOHOR BAHRU,JOHOR"
+  }
+}
