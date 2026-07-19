@@ -1,7 +1,9 @@
 # Share kit — what to do next (human checklist)
 
 Live demo: **https://clearance-1k8l.onrender.com**  
-Repo: **https://github.com/SumithShet18/clearance**
+Repo: **https://github.com/SumithShet18/clearance**  
+
+Recruiter-facing docs: [USE_CASES.md](USE_CASES.md) · [DEMO.md](DEMO.md) · [WHAT_I_BUILT.md](WHAT_I_BUILT.md)
 
 ## 1. Pin on GitHub (2 min)
 

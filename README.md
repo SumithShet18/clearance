@@ -2,214 +2,232 @@
 
 [![ci](https://github.com/SumithShet18/clearance/actions/workflows/ci.yml/badge.svg)](https://github.com/SumithShet18/clearance/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Live Demo](https://img.shields.io/badge/demo-live-success)](https://clearance-1k8l.onrender.com)
 [![Python](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/)
 
-**Agents that finish work — measured, governed, and reversible.**
-
-Portfolio project by [**SumithShet18**](https://github.com/SumithShet18)  
-**Repo:** [github.com/SumithShet18/clearance](https://github.com/SumithShet18/clearance)  
-**Live demo:** [https://clearance-1k8l.onrender.com](https://clearance-1k8l.onrender.com) · [API health](https://clearance-1k8l.onrender.com/api/health)
-
-[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/SumithShet18/clearance)
-
-**v0.4** adds JSONL agent traces, image upload (vision when API key set), and a **claims FNOL** sample pack.
-
-### Free HTTPS (live)
+### Multi-agent document operations for back-office work  
+**Invoices & claims in → policy checks → auto-post or human review → audited ERP action**
 
 | | |
 | --- | --- |
-| **URL** | **https://clearance-1k8l.onrender.com** |
-| **Plan** | Render free (Docker blueprint) |
-| **Note** | Free tier cold-starts in ~30–60s after idle |
+| **Live demo** | **[https://clearance-1k8l.onrender.com](https://clearance-1k8l.onrender.com)** |
+| **Author** | [SumithShet18](https://github.com/SumithShet18) |
+| **Cold start** | Free Render tier may take 30–60s on first open |
 
-Open the link → **One-click demo seed** → inspect HITL cases + audit export.
-
-Redeploy details: [scripts/deploy-render.md](scripts/deploy-render.md).
-
-> Enterprise AI in 2026 fails on **quality, evals, and governance** — not model IQ.  
-> Clearance is a production-shaped **multi-agent document operations** system that turns invoices into audited ERP actions with confidence gates, policy checks, human-in-the-loop, and offline gold evals.
+> **Not a chatbot.** Clearance is a production-shaped **agent system** that *finishes document work*, with human-in-the-loop only when risk is high.
 
 ---
 
-## Demo (60 seconds)
+## The problem (real world)
 
-### Live (no install)
+Finance and insurance teams drown in unstructured documents:
 
-1. Open **[https://clearance-1k8l.onrender.com](https://clearance-1k8l.onrender.com)** (wait if cold-starting)
-2. Click **One-click demo seed**
-3. Open a case → timeline / HITL / **Export audit JSON** / traces
+- Supplier **invoices** must be typed into an ERP (NetSuite, SAP, QuickBooks…)
+- **Claims** (FNOL + repair estimates) must be triaged by adjusters
+- Most “AI demos” answer questions — they don’t **write back** safely or leave an **audit trail**
+- Enterprises care about **accuracy, straight-through processing (STP) %, and who approved what**
 
-### Local
+Clearance models that workflow end-to-end.
+
+---
+
+## What I built
+
+A full-stack **multi-agent document ops product**:
+
+| Layer | Capability |
+| --- | --- |
+| **Agent pipeline** | Plan → extract → validate → policy → decide → (HITL) → act → verify |
+| **Governance** | Confidence thresholds, vendor/amount/currency policy, anomaly flags |
+| **Human-in-the-loop** | Exception queue: approve / reject before irreversible ERP write |
+| **Tools (MCP-shaped)** | `erp_create_bill`, `erp_flag_anomaly`, standalone MCP server |
+| **Observability** | Per-step timeline + JSONL traces + audit export |
+| **Evaluation** | Offline gold sets + dual-track bench (synthetic + CORD receipts) |
+| **Ship** | Docker, CI, live HTTPS on Render |
+
+**Resume line**
+
+> Built and deployed Clearance, a multi-agent document operations system that processes invoices/claims with policy checks, human-in-the-loop escalation, MCP-shaped ERP writeback, audit export, and measured evals. Live demo + dual-track benchmark. FastAPI, Docker, Render.
+
+---
+
+## Use cases
+
+### 1. Accounts payable (primary)
+
+| | |
+| --- | --- |
+| **Who** | AP clerks, controllers, mid-market finance teams |
+| **Input** | Supplier invoice (text/PDF/image path) |
+| **Output** | Structured fields + **ERP bill** *or* exception for human |
+| **Business value** | Lower touch rate on clean invoices; humans only on risk |
+
+**In the demo**
+
+| Sample | Outcome | Real-world meaning |
+| --- | --- | --- |
+| Clean known vendor (ACME) | `acted` + `BILL-…` | Straight-through processing |
+| High $ / unknown vendor | `needs_review` | Exception queue |
+| Non-USD / messy | Escalate | Policy / quality gate |
+
+### 2. Insurance claims intake (second vertical)
+
+| | |
+| --- | --- |
+| **Who** | Claims ops, carriers, TPAs |
+| **Input** | First Notice of Loss + cost estimate |
+| **Output** | Triage: auto-path vs senior adjuster |
+| **Business value** | Speed on low severity; control on high severity |
+
+Samples: `samples/claims/claim_auto_fnol.txt`, `claim_high_severity.txt`
+
+### 3. Same pattern elsewhere (not all built — same architecture)
+
+Procurement exceptions · vendor onboarding packs · lending document intake · any “document → decision → system of record” flow.
+
+More detail: **[docs/USE_CASES.md](docs/USE_CASES.md)**
+
+---
+
+## 60-second demo (for recruiters)
+
+1. Open **[live demo](https://clearance-1k8l.onrender.com)** (wait if cold-starting)  
+2. Click **One-click demo seed**  
+3. Open an **`acted`** case → agent timeline + ERP bill + audit  
+4. Open a **`needs_review`** case → **Approve** → bill created after human  
+5. Optional: **Export audit JSON** · **Observability spans** · **Run Clearance Bench**
+
+Full walkthrough script: **[docs/DEMO.md](docs/DEMO.md)**
+
+---
+
+## How it works
+
+```
+Upload / sample document
+        │
+        ▼
+┌─────────────────────────────────────────┐
+│  Multi-agent pipeline                   │
+│  plan → extract → validate → policy     │
+│       → decide → HITL? → act → verify   │
+└─────────────────────────────────────────┘
+        │                    │
+   low risk              high risk
+        ▼                    ▼
+  ERP create bill      Human review queue
+  (auto STP)           then approve/reject
+        │
+        ▼
+  Audit log + traces + metrics
+```
+
+| Concept | Implementation |
+| --- | --- |
+| Agent composition | Explicit graph (Anthropic-style workflows) |
+| Task / progress state | Magentic-One–style ledgers |
+| Tools | MCP-shaped ERP tools + `mcp-servers/erp` |
+| Quality | Gold labels, per-field bench, CI |
+
+Deep dive: **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** · Competitive honesty: **[docs/COMPETITIVE.md](docs/COMPETITIVE.md)**
+
+---
+
+## Measured results
+
+From **[evals/REPORT.md](evals/REPORT.md)**:
+
+| Track | What | Result |
+| --- | --- | --- |
+| Synthetic (50) | Field accuracy (with stress cases) | **~97.5%** micro |
+| Pipeline subset (25) | Auto-acted vs HITL | **~52% STP / ~48% HITL** |
+| CORD v2 fixtures (25) | Public receipt labels (HF) | Track B in REPORT |
+
+STP &lt; 100% is intentional: governance should *not* auto-post high-risk cases.
+
+---
+
+## Tech stack
+
+| Area | Choice |
+| --- | --- |
+| API | Python, FastAPI, SQLAlchemy, SQLite |
+| UI | Vanilla JS operator console (fast to demo) |
+| Agents | Code-orchestrated multi-step graph + ledgers |
+| Tools | In-process ERP mock + MCP stdio server |
+| Eval | Custom gold sets + benchmark CLI |
+| Deploy | Docker, Render free tier, GitHub Actions CI |
+
+Optional: `CLEARANCE_MODE=llm` + `OPENAI_API_KEY` for LLM/vision extraction (default **mock** = free, offline, CI-stable).
+
+---
+
+## Repository structure
+
+```
+clearance/
+├── README.md                 ← you are here (recruiter overview)
+├── apps/
+│   ├── api/                  ← FastAPI + agent pipeline + tests
+│   └── web/                  ← operator UI (inbox, timeline, HITL)
+├── samples/
+│   ├── invoice_*.txt         ← AP demo cases
+│   ├── claims/               ← insurance FNOL demo cases
+│   ├── cord/                 ← CORD receipt text fixtures
+│   └── synthetic/            ← 50-doc bench corpus
+├── evals/
+│   ├── REPORT.md             ← published benchmark numbers
+│   ├── run_benchmark.py      ← Clearance Bench CLI
+│   ├── gold/                 ← labels
+│   └── datasets/             ← synthetic generator + CORD loader
+├── mcp-servers/erp/          ← standalone MCP ERP tools
+├── docs/
+│   ├── USE_CASES.md          ← real-world use cases
+│   ├── DEMO.md               ← how to demonstrate
+│   ├── ARCHITECTURE.md       ← system design
+│   ├── COMPETITIVE.md        ← what this is / isn’t
+│   └── SHARE_KIT.md          ← LinkedIn / resume / pin checklist
+├── Dockerfile · render.yaml  ← production deploy
+└── scripts/                  ← local run / deploy notes
+```
+
+Technical inventory for hiring managers: **[docs/WHAT_I_BUILT.md](docs/WHAT_I_BUILT.md)**
+
+---
+
+## Quick start (local)
 
 ```bash
 cd apps/api
 python -m venv .venv
 # Windows: .venv\Scripts\activate
-# macOS/Linux: source .venv/bin/activate
+source .venv/bin/activate   # macOS/Linux
 pip install -r requirements.txt
 uvicorn app.main:app --reload --port 8000
 ```
 
-Open **http://127.0.0.1:8000** → same flow as live.
-
-### Docker
+Open http://127.0.0.1:8000  
 
 ```bash
-docker compose up --build
-# http://localhost:8000
+# tests
+pytest -q
+
+# benchmark
+# from repo root, PYTHONPATH=. 
+python evals/run_benchmark.py --source synthetic --limit 50 --pipeline
 ```
-
-### What you will see
-
-| Sample | Typical outcome |
-| --- | --- |
-| ACME / Northwind (clean) | **Auto-acted** → ERP bill + audit |
-| High-value unknown vendor | **HITL** + anomaly flag → approve → bill |
-| EUR / messy OCR | Escalate (currency / low confidence) |
-
-Gold evals target **≥75% field accuracy** (clean set often ~100% in mock mode).
 
 ---
 
-## Architecture
-
-```
-Browser UI
-    │
-    ▼
-FastAPI ──► Agent pipeline (code-orchestrated graph)
-              1 plan (task ledger)
-              2 extract (mock | OpenAI)
-              3 validate (schema + math)
-              4 retrieve_policy
-              5 decide
-              6 flag_anomaly (on risk)
-              7 HITL interrupt
-              8 act → erp_create_bill (MCP-shaped)
-              9 verify
-    │
-    ├── SQLite cases + audit
-    ├── GET /api/evals/run  (offline gold set)
-    ├── GET /api/cases/{id}/export  (compliance bundle)
-    └── mcp-servers/erp  (stdio MCP tool server)
-```
-
-**Compose, don’t reinvent:**  
-Agentgateway connects · HumanLayer schedules · JamJet polices · LangGraph runs graphs · **Clearance finishes the business case.**
-
-See [docs/COMPETITIVE.md](docs/COMPETITIVE.md) and [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
-
----
-
-## Why recruiters care
-
-| Hiring signal | Evidence in this repo |
-| --- | --- |
-| Shipped production agents | Full case lifecycle + irreversible action gates |
-| Evals & quality | `evals/gold` + CI + `/api/evals/run` |
-| HITL / governance | Confidence + policy escalation queue |
-| MCP / tools | Tool catalog + standalone ERP MCP server |
-| System design | Magentic-One ledgers, Anthropic-style composition |
-| Honesty | Competitive map — no “Vic.ai killer” claim |
-
-**Resume bullet**
-
-> Built Clearance, a multi-agent AP DocOps platform (HITL, policy checks, MCP-shaped ERP writeback, audit export, offline gold evals, Docker). Demo auto-resolves clean invoices and escalates high-risk cases with anomaly flags; CI enforces eval thresholds.
-
----
-
-## API
+## API (summary)
 
 | Method | Path | Purpose |
 | --- | --- | --- |
-| GET | `/api/health` | Mode + version |
-| POST | `/api/demo/seed` | Run all samples |
-| GET | `/api/samples` | Sample list |
-| POST | `/api/cases` | Upload |
-| POST | `/api/cases/from-sample/{name}` | Run sample |
-| GET | `/api/cases` | Inbox |
-| GET | `/api/cases/{id}` | Timeline + extraction |
-| POST | `/api/cases/{id}/review` | HITL approve/reject |
-| GET | `/api/cases/{id}/export` | Audit JSON bundle |
-| GET | `/api/cases/metrics/summary` | ROI metrics |
-| GET | `/api/evals/run` | Gold field accuracy |
-| GET | `/api/tools` | MCP tool descriptors |
-
-Optional LLM: set `OPENAI_API_KEY` and `CLEARANCE_MODE=llm` (see `apps/api/.env.example`). Default is **mock** (offline, free, CI-stable).
-
----
-
-## Clearance Bench (datasets + metrics)
-
-Research-backed evaluation track (public invoice/receipt corpora + synthetic gold):
-
-| Track | Source | Purpose |
-| --- | --- | --- |
-| **Synthetic** (default) | 50 reproducible invoices (no PII) | CI + portfolio numbers |
-| **CORD v2** (optional) | HF `naver-clova-ix/cord-v2` | Real receipts credibility |
-| **Manual** | `samples/invoice_*.txt` | Demo storytelling |
-
-```bash
-# from repo root
-set PYTHONPATH=.
-apps\api\.venv\Scripts\python evals\run_benchmark.py --source synthetic --limit 50 --pipeline
-```
-
-### Latest published numbers
-
-See full tables in **[evals/REPORT.md](evals/REPORT.md)**.
-
-| Track | Cases | Micro field acc | Notes |
-| --- | ---: | ---: | --- |
-| **Synthetic** | 50 | **~97.5%** | Includes stress (noise / missing # / math drift) |
-| **Synthetic pipeline STP** | 25 | **~52% auto-act** | **~48% HITL** — governance path works |
-| **CORD v2 receipts** | 25 | **~100%** on GT text renders | Real public receipt labels (HF) |
-
-API: `GET /api/evals/benchmark?source=synthetic&limit=50` · UI **Run Clearance Bench (50)**.
-
-### Share / deploy
-
-1. **Live:** https://clearance-1k8l.onrender.com  
-2. **Pin this repo** on your GitHub profile.  
-3. **Loom (3–5 min):** live seed → HITL → bench → audit export.  
-4. **LinkedIn:** link live demo + dual-track bench metrics from [evals/REPORT.md](evals/REPORT.md).  
-
-Full checklist + copy-paste post/resume: **[docs/SHARE_KIT.md](docs/SHARE_KIT.md)**.
-
-## Tests
-
-```bash
-cd apps/api
-pytest -q
-```
-
-CI: GitHub Actions on every push (unit + gold evals + API smoke).
-
----
-
-## MCP ERP server
-
-```bash
-python mcp-servers/erp/server.py
-# JSON-RPC over stdin: initialize | tools/list | tools/call
-```
-
-Tools: `erp_create_bill`, `erp_flag_anomaly`, `erp_list_bills` — same contracts as in-process tools.
-
----
-
-## Repo layout
-
-```
-clearance/
-  apps/api/          FastAPI + agent pipeline
-  apps/web/          Operator UI
-  samples/           Demo invoices
-  evals/gold/        Labels + offline
-  mcp-servers/erp/   Standalone MCP server
-  docs/              Architecture + competitive map
-  docker-compose.yml One-command deploy
-```
+| GET | `/api/health` | Liveness |
+| POST | `/api/demo/seed` | Batch demo cases |
+| GET/POST | `/api/cases…` | Inbox, detail, HITL review, export, traces |
+| GET | `/api/evals/benchmark` | Run field-accuracy bench |
+| GET | `/api/tools` | MCP tool catalog |
 
 ---
 
@@ -217,4 +235,4 @@ clearance/
 
 MIT © 2026 Sumith Shet
 
-Built with production agent engineering patterns (Anthropic workflows, Magentic-One ledgers, MCP tool design) — not framework cosplay.
+Built to demonstrate **production agent engineering**: multi-step work, tools, governance, evals — not framework cosplay.

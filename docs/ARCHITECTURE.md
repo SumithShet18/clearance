@@ -1,36 +1,66 @@
-# Architecture notes
+# Architecture
 
-## Graph (Phase 1)
+## High-level
 
-Code-orchestrated pipeline in `app/services/pipeline.py`:
+```
+┌──────────────┐     HTTPS      ┌──────────────────────────────────┐
+│ Operator UI  │ ─────────────► │ FastAPI (apps/api)               │
+│ (apps/web)   │                │  cases · review · evals · tools  │
+└──────────────┘                └───────────────┬──────────────────┘
+                                                │
+                                ┌───────────────▼──────────────────┐
+                                │ Agent pipeline                   │
+                                │ plan → extract → validate →      │
+                                │ policy → decide → HITL? →        │
+                                │ act (ERP tool) → verify          │
+                                └───────────────┬──────────────────┘
+                                                │
+                    ┌───────────────────────────┼───────────────────┐
+                    ▼                           ▼                   ▼
+              SQLite cases                 JSONL traces        MCP ERP server
+              + audit JSON                 (data/traces)       (optional stdio)
+```
 
-1. **ingest** — load document text  
-2. **plan** — Task ledger (facts, guesses, plan, risk, effort)  
-3. **extract** — mock regex/structure or OpenAI JSON  
-4. **validate** — schema + arithmetic  
-5. **retrieve_policy** — keyword policy retrieval (stand-in for agentic RAG)  
-6. **decide** — approve / hold / escalate  
-7. **hitl** — interrupt when confidence or policy requires human  
-8. **act** — `erp_create_bill` (MCP-shaped tool)  
-9. **verify** — confirm ERP id + decision  
+## Pipeline stages
 
-## Why code-first orchestration
+| Stage | Role |
+| --- | --- |
+| **ingest** | Load document text / image-derived text |
+| **plan** | Task ledger (facts, plan, risk, effort) |
+| **extract** | Structured fields (mock or LLM/vision) |
+| **validate** | Schema + math integrity |
+| **retrieve_policy** | Policy snippets (vendor, value, currency…) |
+| **decide** | approve / hold / escalate |
+| **flag_anomaly** | On risk — MCP-shaped tool |
+| **hitl** | Interrupt until human approve/reject |
+| **act** | `erp_create_bill` (irreversible gate) |
+| **verify** | Final state check |
 
-Anthropic and OpenAI both recommend mixing **deterministic code orchestration** with LLM judgment. Phase 1 maximizes demo reliability and testability; LangGraph adapters can wrap the same nodes without changing the HTTP product surface.
+## Design principles
 
-## Ledgers
+1. **Orchestration is software** — explicit graph, not prompt soup  
+2. **HITL is selective** — only low confidence or policy risk  
+3. **Irreversible actions are gated** — no silent ERP writes on risk  
+4. **Measure quality** — gold labels + bench CLI  
+5. **Compose infrastructure** — don’t rebuild gateways/control planes  
 
-Inspired by Microsoft Magentic-One:
+See [COMPETITIVE.md](COMPETITIVE.md) for ecosystem positioning.
 
-- **Task ledger** — outer plan (what we’re doing)  
-- **Progress ledger** — inner progress (where we are, stall, needs_human)
+## Key modules
 
-## Safety
-
-- Auto path only when confidence ≥ threshold and policies pass  
-- ERP writeback is treated as **irreversible** and logged in audit  
-- Human approval required for low confidence, unknown high-value vendors, high totals, non-USD  
+| Path | Responsibility |
+| --- | --- |
+| `apps/api/app/services/pipeline.py` | Agent graph |
+| `apps/api/app/services/extractor.py` | Mock / LLM / vision extract |
+| `apps/api/app/services/policy.py` | Business rules |
+| `apps/api/app/services/erp.py` | ERP tools |
+| `apps/api/app/services/traces.py` | JSONL spans |
+| `apps/api/app/routers/cases.py` | Case API + HITL + export |
+| `evals/run_benchmark.py` | Clearance Bench |
+| `mcp-servers/erp/server.py` | Standalone MCP tools |
 
 ## Data
 
-SQLite by default (`data/clearance.db`). Swap `DATABASE_URL` for Postgres when multi-user.
+- Cases: SQLite (`data/clearance.db` local; ephemeral on free Render)  
+- Uploads: `data/uploads/`  
+- Traces: `data/traces/{case_id}.jsonl`  

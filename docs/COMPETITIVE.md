@@ -1,4 +1,6 @@
-# Competitive map — what Clearance is *not*
+# What Clearance is / isn’t (competitive honesty)
+
+**For recruiters:** Clearance is a **portfolio product** that demonstrates production multi-agent document ops. It is **not** claiming to replace full AP suites (Vic.ai, BILL, Rossum) in the market.
 
 ## Do not reinvent
 
