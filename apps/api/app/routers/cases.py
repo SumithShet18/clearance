@@ -202,3 +202,30 @@ async def review_case(
     return _row_to_detail(row)
 
 
+@router.get("/{case_id}/export")
+async def export_case(case_id: str, session: AsyncSession = Depends(get_session)):
+    """Full audit bundle for procurement / compliance storytelling."""
+    row = await get_case(session, case_id)
+    if not row:
+        raise HTTPException(404, "Case not found")
+    detail = _row_to_detail(row)
+    return {
+        "case_id": row.id,
+        "exported_at": now().isoformat(),
+        "product": "Clearance",
+        "version": "0.2.0",
+        "filename": row.filename,
+        "status": row.status,
+        "decision": row.decision,
+        "erp_bill_id": row.erp_bill_id,
+        "overall_confidence": row.overall_confidence,
+        "cost_usd": row.cost_usd,
+        "extraction": detail.extraction.model_dump() if detail.extraction else None,
+        "validation": detail.validation.model_dump() if detail.validation else None,
+        "task_ledger": detail.task_ledger.model_dump() if detail.task_ledger else None,
+        "progress_ledger": detail.progress_ledger.model_dump() if detail.progress_ledger else None,
+        "steps": detail.steps,
+        "audit": detail.audit,
+    }
+
+

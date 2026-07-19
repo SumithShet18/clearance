@@ -11,9 +11,18 @@ async function api(path, opts = {}) {
 
 let selectedId = null;
 
+function toast(msg) {
+  const el = $("#toast");
+  el.textContent = msg;
+  el.classList.remove("hidden");
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => el.classList.add("hidden"), 3200);
+}
+
 async function boot() {
   const health = await api("/api/health");
   $("#modeBadge").textContent = `mode: ${health.mode}`;
+  if (health.version) $("#verBadge").textContent = `v${health.version}`;
   await Promise.all([refreshMetrics(), refreshSamples(), refreshCases(), maybeEval()]);
   $("#fileInput").addEventListener("change", onUpload);
   $("#btnEval").addEventListener("click", async () => {
@@ -24,6 +33,24 @@ async function boot() {
       $("#btnEval").disabled = false;
     }
   });
+  $("#btnSeed").addEventListener("click", seedDemo);
+}
+
+async function seedDemo() {
+  const btn = $("#btnSeed");
+  btn.disabled = true;
+  btn.textContent = "Seeding…";
+  try {
+    const r = await api("/api/demo/seed", { method: "POST" });
+    toast(`Seeded ${r.seeded} cases through the full agent pipeline`);
+    await Promise.all([refreshMetrics(), refreshCases(), maybeEval()]);
+    if (r.cases?.length) await selectCase(r.cases[r.cases.length - 1].id);
+  } catch (e) {
+    toast(`Seed failed: ${e.message}`);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "▶ One-click demo seed";
+  }
 }
 
 async function refreshMetrics() {
@@ -39,7 +66,11 @@ async function maybeEval(force = false) {
   try {
     const e = await api("/api/evals/run");
     $("#mEval").textContent = pct(e.field_accuracy);
-    if (force) alert(`Gold eval: ${e.cases} cases\nField accuracy: ${pct(e.field_accuracy)}\nTotal match: ${pct(e.total_match_rate)}\nVendor match: ${pct(e.vendor_match_rate)}`);
+    if (force) {
+      toast(
+        `Gold eval · ${e.cases} cases · field ${pct(e.field_accuracy)} · total ${pct(e.total_match_rate)} · vendor ${pct(e.vendor_match_rate)}`
+      );
+    }
   } catch {
     $("#mEval").textContent = "n/a";
   }
@@ -52,7 +83,7 @@ async function refreshSamples() {
   for (const name of samples) {
     const btn = document.createElement("button");
     btn.className = "item";
-    btn.innerHTML = `<div class="title">${name}</div><div class="meta">run sample</div>`;
+    btn.innerHTML = `<div class="title">${escapeHtml(name)}</div><div class="meta">run sample</div>`;
     btn.onclick = () => runSample(name);
     box.appendChild(btn);
   }
@@ -80,6 +111,7 @@ async function refreshCases() {
 async function runSample(name) {
   const created = await api(`/api/cases/from-sample/${encodeURIComponent(name)}`, { method: "POST" });
   selectedId = created.id;
+  toast(`${name} → ${created.status}`);
   await Promise.all([refreshCases(), refreshMetrics(), selectCase(created.id)]);
 }
 
@@ -90,12 +122,13 @@ async function onUpload(e) {
   fd.append("file", file);
   const res = await fetch("/api/cases", { method: "POST", body: fd });
   if (!res.ok) {
-    alert(await res.text());
+    toast(await res.text());
     return;
   }
   const created = await res.json();
   selectedId = created.id;
   e.target.value = "";
+  toast(`Uploaded → ${created.status}`);
   await Promise.all([refreshCases(), refreshMetrics(), selectCase(created.id)]);
 }
 
@@ -119,7 +152,10 @@ async function selectCase(id) {
           ${c.erp_bill_id ? `<span class="badge">ERP ${escapeHtml(c.erp_bill_id)}</span>` : ""}
         </div>
       </div>
-      <div class="badge muted">${escapeHtml(c.filename)}</div>
+      <div class="detail-actions">
+        <button class="btn ghost" id="btnExport">Export audit JSON</button>
+        <span class="badge muted">${escapeHtml(c.filename)}</span>
+      </div>
     </div>
 
     <div class="kv">
@@ -131,7 +167,7 @@ async function selectCase(id) {
 
     <h3 class="sub">Agent timeline</h3>
     <div class="timeline">
-      ${steps.map(s => `
+      ${steps.map((s) => `
         <div class="step ${s.status}">
           <div class="name">${escapeHtml(s.name)}</div>
           <div>
@@ -154,7 +190,7 @@ async function selectCase(id) {
         <h3>Human-in-the-loop required</h3>
         <p class="detail">${escapeHtml(c.progress_ledger?.human_reason || "Review required before ERP writeback.")}</p>
         <label class="sub">Note</label>
-        <input type="text" id="reviewNote" placeholder="Optional note" />
+        <input type="text" id="reviewNote" placeholder="Optional note for audit trail" />
         <div class="review-actions">
           <button class="btn" id="btnApprove">Approve → create ERP bill</button>
           <button class="btn secondary" id="btnReject">Reject</button>
@@ -164,14 +200,26 @@ async function selectCase(id) {
     <h3 class="sub">Audit log</h3>
     <pre class="audit">${escapeHtml(JSON.stringify(c.audit || [], null, 2))}</pre>
 
-    <h3 class="sub">Task ledger</h3>
+    <h3 class="sub">Task ledger (Magentic-One style)</h3>
     <pre class="audit">${escapeHtml(JSON.stringify(c.task_ledger || {}, null, 2))}</pre>
   `;
 
+  $("#btnExport").onclick = () => exportAudit(id);
   if (needsReview) {
     $("#btnApprove").onclick = () => review(id, "approve");
     $("#btnReject").onclick = () => review(id, "reject");
   }
+}
+
+async function exportAudit(id) {
+  const bundle = await api(`/api/cases/${id}/export`);
+  const blob = new Blob([JSON.stringify(bundle, null, 2)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `clearance-audit-${id.slice(0, 8)}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast("Audit bundle downloaded");
 }
 
 async function review(id, action) {
@@ -181,6 +229,7 @@ async function review(id, action) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ action, note }),
   });
+  toast(action === "reject" ? "Case rejected" : "Approved — ERP bill created");
   await Promise.all([refreshCases(), refreshMetrics(), selectCase(id)]);
 }
 

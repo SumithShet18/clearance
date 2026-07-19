@@ -27,9 +27,10 @@ app = FastAPI(
         "Production multi-agent document operations — extract, validate, policy-check, "
         "HITL, MCP-shaped ERP writeback, and evals. Compose, don't reinvent control planes."
     ),
-    version="0.1.0",
+    version="0.2.0",
     lifespan=lifespan,
 )
+
 
 
 app.add_middleware(
@@ -53,8 +54,10 @@ async def health():
         "mode": "llm" if settings.use_llm else "mock",
         "hitl_threshold": settings.confidence_hitl_threshold,
         "product": "Clearance",
-        "version": "0.1.0",
+        "version": "0.2.0",
+        "skills": ["HITL", "MCP-tools", "gold-evals", "audit-export", "demo-seed"],
     }
+
 
 
 @app.get("/api/tools")
@@ -69,6 +72,37 @@ async def list_samples():
     if not root.exists():
         return []
     return sorted(p.name for p in root.glob("*.txt"))
+
+
+@app.post("/api/demo/seed")
+async def seed_demo():
+    """Run all sample invoices through the pipeline (portfolio one-click demo)."""
+    from app.db import CaseRow, SessionLocal, new_id, now
+    from app.models.schemas import CaseStatus
+    from app.services.pipeline import run_pipeline
+
+    root = Path(__file__).resolve().parents[3] / "samples"
+    samples = sorted(root.glob("*.txt")) if root.exists() else []
+    created: list[dict] = []
+    async with SessionLocal() as session:
+        for path in samples:
+            text = path.read_text(encoding="utf-8")
+            case_id = new_id()
+            row = CaseRow(
+                id=case_id,
+                filename=path.name,
+                status=CaseStatus.pending.value,
+                content_text=text,
+                file_path=str(path),
+                created_at=now(),
+                updated_at=now(),
+            )
+            session.add(row)
+            await session.commit()
+            await run_pipeline(session, row)
+            await session.refresh(row)
+            created.append({"id": row.id, "filename": row.filename, "status": row.status})
+    return {"seeded": len(created), "cases": created}
 
 
 @app.get("/")

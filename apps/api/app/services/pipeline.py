@@ -25,7 +25,7 @@ from app.models.schemas import (
     TaskLedger,
     ValidationResult,
 )
-from app.services.erp import create_bill
+from app.services.erp import create_bill, flag_anomaly
 from app.services.extractor import extract_invoice
 from app.services.policy import apply_policy, retrieve_policies
 
@@ -227,16 +227,36 @@ async def run_pipeline(session: AsyncSession, case: CaseRow) -> CaseRow:
         progress.needs_human = True
         progress.human_reason = reason
         progress.current_step = "hitl"
+        anomaly = flag_anomaly(
+            bill_id=f"CASE-{case.id[:8]}",
+            reason=reason,
+            severity="high" if "High-value" in reason or "POL-002" in reason else "medium",
+        )
+        steps.append(
+            _step(
+                "flag_anomaly",
+                "completed",
+                f"Anomaly {anomaly['id']} recorded",
+                {"tool": "erp_flag_anomaly", "anomaly": anomaly},
+            )
+        )
         steps.append(_step("hitl", "waiting", reason))
         steps.append(_step("act", "skipped", "Waiting for human approval before ERP writeback"))
         steps.append(_step("verify", "skipped", "Pending HITL"))
         case.status = CaseStatus.needs_review.value
         case.progress_ledger_json = dumps(progress)
         case.steps_json = dumps(steps)
-        case.audit_json = dumps(audit + [{"event": "hitl_required", "reason": reason, "at": now().isoformat()}])
+        case.audit_json = dumps(
+            audit
+            + [
+                {"event": "erp_flag_anomaly", "anomaly": anomaly, "at": now().isoformat()},
+                {"event": "hitl_required", "reason": reason, "at": now().isoformat()},
+            ]
+        )
         case.updated_at = now()
         await session.commit()
         return case
+
 
     # 7. Act (MCP-shaped ERP tool) — irreversible gate passed
     progress.current_step = "act"

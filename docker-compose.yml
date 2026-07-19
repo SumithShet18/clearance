@@ -1,0 +1,13 @@
+services:
+  clearance:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      CLEARANCE_MODE: mock
+    volumes:
+      - clearance-data:/app/data
+    restart: unless-stopped
+
+volumes:
+  clearance-data:

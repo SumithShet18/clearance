@@ -1,20 +1,27 @@
-# Clearance ERP MCP server (sketch)
+# Clearance ERP MCP server
 
-Phase 1 implements ERP tools **in-process** (`apps/api/app/services/erp.py`) with MCP-compatible tool descriptors exposed at `GET /api/tools`.
+Standalone stdio server implementing MCP-style JSON-RPC tools used by Clearance:
 
-## Planned standalone server
+| Tool | Purpose |
+| --- | --- |
+| `erp_create_bill` | Create AP bill after validation / HITL |
+| `erp_flag_anomaly` | Record fraud/policy anomaly |
+| `erp_list_bills` | List session bills |
 
-```text
-tools:
-  - erp_create_bill
-  - erp_list_bills
-```
-
-Run pattern (future):
+## Run
 
 ```bash
-# example shape — wire to official MCP Python SDK when promoting to Phase 2
 python server.py
 ```
 
-**Tool design lesson (Anthropic):** descriptions must state *when* to use the tool and hard boundaries (e.g. only after validation / human approval). Bad tool docs poison multi-agent systems.
+Send newline-delimited JSON-RPC on stdin, e.g.:
+
+```json
+{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}
+{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}
+{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"erp_create_bill","arguments":{"vendor_name":"ACME","invoice_number":"1","total":10}}}
+```
+
+Tool contracts match `GET /api/tools` on the Clearance API (in-process mock).
+
+**Anthropic lesson:** tool descriptions state *when* to use each tool and hard boundaries (never create bills before validation/HITL).

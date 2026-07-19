@@ -18,12 +18,13 @@ jobs:
           python-version: "3.12"
       - name: Install
         run: pip install -r requirements.txt
-      - name: Unit + gold evals
-        run: pytest ../../evals/test_gold.py tests/test_pipeline.py -q
+      - name: Unit + integration + gold evals
+        run: pytest -q
       - name: API smoke
         run: |
           uvicorn app.main:app --host 127.0.0.1 --port 8000 &
           sleep 2
           curl -sf http://127.0.0.1:8000/api/health
+          curl -sf -X POST http://127.0.0.1:8000/api/demo/seed
           curl -sf http://127.0.0.1:8000/api/evals/run | tee /tmp/eval.json
           python -c "import json; d=json.load(open('/tmp/eval.json')); assert d['field_accuracy']>=0.75"

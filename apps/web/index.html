@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Clearance — Production Multi-Agent DocOps</title>
+  <meta name="description" content="Clearance finishes the business case: multi-agent AP document operations with HITL, MCP tools, gold evals, and full audit export." />
   <link rel="stylesheet" href="/static/styles.css" />
 </head>
 <body>
@@ -18,9 +19,28 @@
       </div>
       <div class="badges">
         <span class="badge" id="modeBadge">mode: …</span>
-        <span class="badge muted">Phase 1 MVP</span>
+        <span class="badge ok" id="verBadge">v0.2</span>
+        <a class="badge muted" href="https://github.com/SumithShet18/clearance" target="_blank" rel="noreferrer">GitHub</a>
       </div>
     </header>
+
+    <section class="hero">
+      <div>
+        <h2>Production multi-agent DocOps — not another chatbot.</h2>
+        <p>
+          Extract → validate → policy → decide → <strong>HITL</strong> → MCP-shaped ERP act → verify.
+          Quality is measured with offline gold evals. High-risk cases escalate; irreversible writes are audited.
+        </p>
+        <div class="hero-actions">
+          <button class="btn" id="btnSeed">▶ One-click demo seed</button>
+          <button class="btn secondary" id="btnEval">Run gold evals</button>
+        </div>
+      </div>
+      <ol class="flow">
+        <li>Plan</li><li>Extract</li><li>Validate</li><li>Policy</li>
+        <li>Decide</li><li>HITL</li><li>Act</li><li>Verify</li>
+      </ol>
+    </section>
 
     <section class="metrics" id="metrics">
       <div class="metric"><div class="n" id="mTotal">—</div><div class="l">Cases</div></div>
@@ -33,35 +53,34 @@
 
     <div class="grid">
       <aside class="panel">
-        <h2>Cases</h2>
+        <h2>Inbox</h2>
         <div class="actions">
           <label class="btn secondary">
             Upload invoice
-            <input type="file" id="fileInput" hidden />
+            <input type="file" id="fileInput" accept=".txt,.pdf,.csv" hidden />
           </label>
-          <button class="btn" id="btnEval">Run gold evals</button>
         </div>
         <h3 class="sub">Samples</h3>
         <div id="samples" class="sample-list"></div>
-        <h3 class="sub">Inbox</h3>
+        <h3 class="sub">Cases</h3>
         <div id="caseList" class="case-list"></div>
       </aside>
 
       <main class="panel main" id="detail">
         <div class="empty">
-          <h2>Select or run a case</h2>
-          <p>Upload a text invoice or click a sample. Watch the multi-agent pipeline:
-            plan → extract → validate → policy → decide → HITL → act → verify.</p>
-          <p class="hint">Clean ACME/Northwind samples often auto-resolve. Messy, high-value, unknown-vendor, and EUR samples trigger human-in-the-loop.</p>
+          <h2>Run the portfolio demo</h2>
+          <p>Click <strong>One-click demo seed</strong> to process all sample invoices, then open a case to inspect the agent timeline, HITL queue, ERP bill id, and audit export.</p>
+          <p class="hint">Clean ACME / Northwind → often auto-act. High-value / unknown / EUR / messy → escalate with anomaly flag + human approval.</p>
         </div>
       </main>
     </div>
 
     <footer>
-      <span>Compose: code-orchestrated agent graph · MCP-shaped ERP tools · offline evals · HITL</span>
-      <span>Not another control plane — see <code>docs/COMPETITIVE.md</code></span>
+      <span>Compose: agent graph · MCP ERP tools · gold evals · audit export · Docker</span>
+      <span>Agentgateway connects · HumanLayer schedules · <strong>Clearance finishes the case</strong></span>
     </footer>
   </div>
+  <div id="toast" class="toast hidden"></div>
   <script src="/static/app.js"></script>
 </body>
 </html>
