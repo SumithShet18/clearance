@@ -7,20 +7,24 @@
 **Agents that finish work — measured, governed, and reversible.**
 
 Portfolio project by [**SumithShet18**](https://github.com/SumithShet18)  
-**Repo:** [github.com/SumithShet18/clearance](https://github.com/SumithShet18/clearance)
+**Repo:** [github.com/SumithShet18/clearance](https://github.com/SumithShet18/clearance)  
+**Live demo:** [https://clearance-1k8l.onrender.com](https://clearance-1k8l.onrender.com) · [API health](https://clearance-1k8l.onrender.com/api/health)
 
 [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/SumithShet18/clearance)
 
 **v0.4** adds JSONL agent traces, image upload (vision when API key set), and a **claims FNOL** sample pack.
 
-### Free HTTPS deploy (Render)
+### Free HTTPS (live)
 
-1. Click **Deploy to Render** above (or open [this link](https://render.com/deploy?repo=https://github.com/SumithShet18/clearance)).
-2. Sign in with GitHub → **Apply** Blueprint (Docker, free plan).
-3. After build: open `https://clearance-….onrender.com` → **One-click demo seed**.
+| | |
+| --- | --- |
+| **URL** | **https://clearance-1k8l.onrender.com** |
+| **Plan** | Render free (Docker blueprint) |
+| **Note** | Free tier cold-starts in ~30–60s after idle |
 
-Details: [scripts/deploy-render.md](scripts/deploy-render.md).  
-`render.yaml` uses **Docker** so `samples/` + `evals/` ship with the image.
+Open the link → **One-click demo seed** → inspect HITL cases + audit export.
+
+Redeploy details: [scripts/deploy-render.md](scripts/deploy-render.md).
 
 > Enterprise AI in 2026 fails on **quality, evals, and governance** — not model IQ.  
 > Clearance is a production-shaped **multi-agent document operations** system that turns invoices into audited ERP actions with confidence gates, policy checks, human-in-the-loop, and offline gold evals.
@@ -28,6 +32,14 @@ Details: [scripts/deploy-render.md](scripts/deploy-render.md).
 ---
 
 ## Demo (60 seconds)
+
+### Live (no install)
+
+1. Open **[https://clearance-1k8l.onrender.com](https://clearance-1k8l.onrender.com)** (wait if cold-starting)
+2. Click **One-click demo seed**
+3. Open a case → timeline / HITL / **Export audit JSON** / traces
+
+### Local
 
 ```bash
 cd apps/api
@@ -38,7 +50,7 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload --port 8000
 ```
 
-Open **http://127.0.0.1:8000** → click **One-click demo seed** → open a case → export audit JSON.
+Open **http://127.0.0.1:8000** → same flow as live.
 
 ### Docker
 
@@ -157,10 +169,10 @@ API: `GET /api/evals/benchmark?source=synthetic&limit=50` · UI **Run Clearance 
 
 ### Share / deploy
 
-1. **One-click Render:** button above (free tier, mock mode).  
-2. **Local:** `uvicorn` as above.  
-3. **Loom (add your link):** seed → HITL → bench → audit export (3–5 min).  
-4. **Pin this repo** on your GitHub profile.
+1. **Live:** https://clearance-1k8l.onrender.com  
+2. **Pin this repo** on your GitHub profile.  
+3. **Loom (3–5 min):** live seed → HITL → bench → audit export.  
+4. **LinkedIn:** link live demo + dual-track bench metrics from [evals/REPORT.md](evals/REPORT.md).
 
 ## Tests
 
