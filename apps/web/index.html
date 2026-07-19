@@ -3,65 +3,85 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Clearance — Production Multi-Agent DocOps</title>
-  <meta name="description" content="Clearance finishes the business case: multi-agent AP document operations with HITL, MCP tools, gold evals, and full audit export." />
+  <title>Clearance — AP Document Ops</title>
+  <meta name="description" content="Upload invoices, review exceptions, post bills, export CSV. Multi-agent AP with human-in-the-loop." />
   <link rel="stylesheet" href="/static/styles.css" />
 </head>
 <body>
-  <div class="app">
+  <div id="loginGate" class="login-gate hidden">
+    <div class="login-card">
+      <div class="logo">C</div>
+      <h1>Clearance</h1>
+      <p class="tag">Sign in to your AP workspace</p>
+      <input type="password" id="loginPassword" placeholder="Workspace password" autocomplete="current-password" />
+      <button class="btn" id="btnLogin">Sign in</button>
+      <p class="hint" id="loginHint"></p>
+    </div>
+  </div>
+
+  <div class="app" id="appRoot">
     <header class="top">
       <div class="brand">
         <div class="logo">C</div>
         <div>
           <h1>Clearance</h1>
-          <p class="tag">Agents that finish work — measured, governed, reversible</p>
+          <p class="tag" id="companyTag">AP document operations</p>
         </div>
       </div>
       <div class="badges">
         <span class="badge" id="modeBadge">mode: …</span>
-        <span class="badge ok" id="verBadge">v0.4</span>
-        <a class="badge muted" href="https://github.com/SumithShet18/clearance" target="_blank" rel="noreferrer">GitHub</a>
+        <span class="badge ok" id="verBadge">v1.0</span>
+        <button class="badge muted" id="btnNavInbox" type="button">Inbox</button>
+        <button class="badge muted" id="btnNavBills" type="button">Bills</button>
+        <button class="badge muted" id="btnNavSettings" type="button">Settings</button>
+        <button class="badge muted hidden" id="btnLogout" type="button">Log out</button>
       </div>
     </header>
 
-    <section class="hero">
+    <section class="hero product-hero">
       <div>
-        <h2>Production multi-agent DocOps — not another chatbot.</h2>
+        <h2>Invoice inbox — extract, review, post</h2>
         <p>
-          Extract → validate → policy → decide → <strong>HITL</strong> → MCP-shaped ERP act → verify.
-          Quality is measured with offline gold evals. High-risk cases escalate; irreversible writes are audited.
+          Upload supplier invoices (PDF, image, or text). Policy checks auto-post clean cases or queue exceptions for your review.
+          Posted bills export to CSV for accounting.
         </p>
         <div class="hero-actions">
-          <button class="btn" id="btnSeed">▶ One-click demo seed</button>
-          <button class="btn secondary" id="btnEval">Run gold evals</button>
-          <button class="btn secondary" id="btnBench">Run Clearance Bench (50)</button>
+          <label class="btn" id="uploadLabel">
+            Upload invoice
+            <input type="file" id="fileInput" accept=".txt,.pdf,.csv,.png,.jpg,.jpeg,.webp" hidden />
+          </label>
+          <button class="btn secondary" id="btnExportBills">Download bills CSV</button>
+          <button class="btn secondary hidden" id="btnSeed">▶ Demo seed</button>
+          <button class="btn secondary hidden" id="btnEval">Gold evals</button>
+          <button class="btn secondary hidden" id="btnBench">Bench (50)</button>
         </div>
       </div>
       <ol class="flow">
-        <li>Plan</li><li>Extract</li><li>Validate</li><li>Policy</li>
-        <li>Decide</li><li>HITL</li><li>Act</li><li>Verify</li>
+        <li>Upload</li><li>Extract</li><li>Policy</li>
+        <li>HITL</li><li>Post bill</li><li>Export</li>
       </ol>
     </section>
 
     <section class="metrics" id="metrics">
       <div class="metric"><div class="n" id="mTotal">—</div><div class="l">Cases</div></div>
-      <div class="metric"><div class="n" id="mAuto">—</div><div class="l">Auto-resolved</div></div>
+      <div class="metric"><div class="n" id="mAuto">—</div><div class="l">Auto-posted</div></div>
       <div class="metric"><div class="n" id="mReview">—</div><div class="l">Needs review</div></div>
-      <div class="metric"><div class="n" id="mRate">—</div><div class="l">Auto-resolve rate</div></div>
+      <div class="metric"><div class="n" id="mRate">—</div><div class="l">Auto-post rate</div></div>
       <div class="metric"><div class="n" id="mConf">—</div><div class="l">Avg confidence</div></div>
-      <div class="metric"><div class="n" id="mEval">—</div><div class="l">Gold field accuracy</div></div>
+      <div class="metric"><div class="n" id="mEval">—</div><div class="l">Bills posted</div></div>
     </section>
 
-    <div class="grid">
+    <div id="viewInbox" class="grid">
       <aside class="panel">
         <h2>Inbox</h2>
-        <div class="actions">
-          <label class="btn secondary">
-            Upload invoice
-            <input type="file" id="fileInput" accept=".txt,.pdf,.csv" hidden />
-          </label>
+        <div class="tabs" id="statusTabs">
+          <button type="button" data-status="needs_review" class="tab active">Needs review</button>
+          <button type="button" data-status="acted" class="tab">Posted</button>
+          <button type="button" data-status="rejected" class="tab">Rejected</button>
+          <button type="button" data-status="" class="tab">All</button>
         </div>
-        <h3 class="sub">Samples</h3>
+        <input type="search" id="caseSearch" class="search" placeholder="Search vendor, inv #…" />
+        <h3 class="sub hidden" id="samplesHead">Samples</h3>
         <div id="samples" class="sample-list"></div>
         <h3 class="sub">Cases</h3>
         <div id="caseList" class="case-list"></div>
@@ -69,16 +89,48 @@
 
       <main class="panel main" id="detail">
         <div class="empty">
-          <h2>Run the portfolio demo</h2>
-          <p>Click <strong>One-click demo seed</strong> to process all sample invoices, then open a case to inspect the agent timeline, HITL queue, ERP bill id, and audit export.</p>
-          <p class="hint">Clean ACME / Northwind → often auto-act. High-value / unknown / EUR / messy → escalate with anomaly flag + human approval.</p>
+          <h2>Start with an invoice</h2>
+          <p>Upload a PDF, image, or text invoice. Clean known vendors may auto-post; high-risk cases land in <strong>Needs review</strong> for you to edit and approve.</p>
+          <p class="hint">Tip: set a workspace password and known vendors under Settings for production use.</p>
         </div>
       </main>
     </div>
 
+    <div id="viewBills" class="panel bills-panel hidden">
+      <div class="detail-head">
+        <h2>Posted bills</h2>
+        <button class="btn secondary" id="btnExportBills2">Download CSV</button>
+      </div>
+      <div id="billsTable" class="bills-table"></div>
+    </div>
+
+    <div id="viewSettings" class="panel settings-panel hidden">
+      <h2>Workspace settings</h2>
+      <p class="hint">Policy thresholds and known vendors for auto-post vs review.</p>
+      <label class="field">Company name <input id="setCompany" type="text" /></label>
+      <label class="field">Known vendors (one per line)
+        <textarea id="setVendors" rows="6"></textarea>
+      </label>
+      <div class="kv settings-kv">
+        <label class="field">High-value threshold ($)
+          <input id="setHigh" type="number" step="100" />
+        </label>
+        <label class="field">Unknown vendor $ threshold
+          <input id="setUnk" type="number" step="50" />
+        </label>
+        <label class="field">HITL confidence (0–1)
+          <input id="setConf" type="number" step="0.01" min="0" max="1" />
+        </label>
+        <label class="field">Allowed currencies (comma)
+          <input id="setCurr" type="text" />
+        </label>
+      </div>
+      <button class="btn" id="btnSaveSettings">Save settings</button>
+    </div>
+
     <footer>
-      <span>Compose: agent graph · MCP ERP tools · gold evals · audit export · Docker</span>
-      <span>Agentgateway connects · HumanLayer schedules · <strong>Clearance finishes the case</strong></span>
+      <span>Clearance — single-tenant AP · HITL · durable bills · CSV export</span>
+      <span id="footerDemo" class="hidden">Demo tools enabled (CLEARANCE_DEMO)</span>
     </footer>
   </div>
   <div id="toast" class="toast hidden"></div>

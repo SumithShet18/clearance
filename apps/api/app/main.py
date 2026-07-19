@@ -4,16 +4,19 @@ from pathlib import Path
 
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
+from app.auth import AuthMiddleware
 from app.config import settings
 from app.db import init_db
 from app.middleware_rate_limit import RateLimitMiddleware
-from app.routers import cases, evals
+from app.routers import auth_api, bills, cases, evals, settings_api
 from app.services.erp import MCP_TOOLS
+
+VERSION = "1.0.0"
 
 
 @asynccontextmanager
@@ -25,10 +28,10 @@ async def lifespan(_app: FastAPI):
 app = FastAPI(
     title="Clearance",
     description=(
-        "Production multi-agent document operations — extract, validate, policy-check, "
-        "HITL, MCP-shaped ERP writeback, and evals. Compose, don't reinvent control planes."
+        "Single-tenant AP document operations — upload invoices, policy checks, "
+        "HITL review, ERP bills, CSV export. Compose agents that finish work."
     ),
-    version="0.5.0",
+    version=VERSION,
     lifespan=lifespan,
 )
 
@@ -40,8 +43,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.add_middleware(RateLimitMiddleware)
+app.add_middleware(AuthMiddleware)
 
+app.include_router(auth_api.router)
 app.include_router(cases.router)
+app.include_router(bills.router)
+app.include_router(settings_api.router)
 app.include_router(evals.router)
 
 WEB_DIR = Path(__file__).resolve().parents[2] / "web"
@@ -53,44 +60,47 @@ async def health():
         "status": "ok",
         "mode": "llm" if settings.use_llm else "mock",
         "erp": settings.erp_backend,
+        "auth_required": settings.auth_required,
+        "demo_mode": settings.clearance_demo,
         "rate_limit_per_minute": settings.rate_limit_per_minute,
         "hitl_threshold": settings.confidence_hitl_threshold,
         "product": "Clearance",
-        "version": "0.5.0",
+        "version": VERSION,
         "skills": [
             "HITL",
+            "edit-and-approve",
+            "PDF-intake",
+            "image-upload",
             "MCP-tools",
-            "MCP-stdio-ERP",
+            "durable-bills",
+            "csv-export",
+            "settings",
+            "duplicate-guard",
+            "session-auth",
             "gold-evals",
-            "sroie-hard-bench",
-            "audit-export",
-            "demo-seed",
             "clearance-bench",
-            "jsonl-traces",
-            "vision-upload",
-            "claims-pack",
-            "rate-limit",
         ],
     }
 
 
 @app.get("/api/tools")
 async def tools():
-    """MCP-shaped tool catalog; runtime backend is settings.erp_backend (mock|mcp)."""
     return {"tools": MCP_TOOLS, "backend": settings.erp_backend}
 
 
 @app.get("/api/samples")
 async def list_samples():
+    if not settings.clearance_demo:
+        return []
     root = Path(__file__).resolve().parents[3] / "samples"
     if not root.exists():
         return []
-    # relative paths under samples/ for nested packs
     out: list[str] = []
     for p in sorted(root.rglob("*.txt")):
         rel = p.relative_to(root).as_posix()
-        # skip bulk synthetic in sample list UI (still seedable)
-        if rel.startswith("synthetic/"):
+        if rel.startswith("synthetic/") or rel.startswith("sroie_hard/"):
+            continue
+        if rel.startswith("sroie/") and not rel.endswith(("000.txt", "001.txt", "002.txt")):
             continue
         out.append(rel)
     return out
@@ -98,7 +108,8 @@ async def list_samples():
 
 @app.post("/api/demo/seed")
 async def seed_demo():
-    """Run demo samples (root + claims; not full synthetic bulk)."""
+    if not settings.clearance_demo:
+        raise HTTPException(403, "Demo mode disabled (CLEARANCE_DEMO=false)")
     from app.db import CaseRow, SessionLocal, new_id, now
     from app.models.schemas import CaseStatus
     from app.services.pipeline import run_pipeline
@@ -123,6 +134,7 @@ async def seed_demo():
                 file_path=str(path),
                 created_at=now(),
                 updated_at=now(),
+                archived=0,
             )
             session.add(row)
             await session.commit()

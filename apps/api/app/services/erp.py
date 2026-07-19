@@ -1,4 +1,4 @@
-"""ERP writeback — in-process mock or MCP stdio process (CLEARANCE_ERP=mcp)."""
+"""ERP writeback — durable SQLite bills + optional MCP stdio process."""
 
 from __future__ import annotations
 
@@ -13,6 +13,14 @@ from uuid import uuid4
 
 from app.config import settings
 
+# Optional async session for durable persist (set by create_bill_async callers)
+_BILLS_MEM: dict[str, "Bill"] = {}
+_ANOMALIES: dict[str, "Anomaly"] = {}
+
+_MCP_LOCK = threading.Lock()
+_MCP_PROC: subprocess.Popen[str] | None = None
+_MCP_MSG_ID = 0
+
 
 @dataclass
 class Bill:
@@ -23,6 +31,8 @@ class Bill:
     currency: str
     status: str
     created_at: str
+    case_id: str | None = None
+    invoice_date: str = ""
 
 
 @dataclass
@@ -34,21 +44,11 @@ class Anomaly:
     created_at: str
 
 
-_BILLS: dict[str, Bill] = {}
-_ANOMALIES: dict[str, Anomaly] = {}
-
-_MCP_LOCK = threading.Lock()
-_MCP_PROC: subprocess.Popen[str] | None = None
-_MCP_MSG_ID = 0
-
-
 def _mcp_server_path() -> Path:
-    # apps/api/app/services/erp.py → repo root
     return Path(__file__).resolve().parents[4] / "mcp-servers" / "erp" / "server.py"
 
 
 def _mcp_rpc(method: str, params: dict | None = None) -> dict:
-    """JSON-RPC over stdin/stdout to mcp-servers/erp/server.py."""
     global _MCP_PROC, _MCP_MSG_ID
     server = _mcp_server_path()
     if not server.exists():
@@ -64,7 +64,6 @@ def _mcp_rpc(method: str, params: dict | None = None) -> dict:
                 text=True,
                 bufsize=1,
             )
-            # handshake
             _MCP_MSG_ID += 1
             init = {
                 "jsonrpc": "2.0",
@@ -118,6 +117,8 @@ def _bill_from_dict(d: dict) -> Bill:
         currency=str(d.get("currency") or "USD"),
         status=str(d.get("status") or "pending_payment"),
         created_at=str(d.get("created_at") or datetime.now(timezone.utc).isoformat()),
+        case_id=d.get("case_id"),
+        invoice_date=str(d.get("invoice_date") or ""),
     )
 
 
@@ -126,6 +127,9 @@ def create_bill(
     invoice_number: str,
     total: float,
     currency: str = "USD",
+    *,
+    case_id: str | None = None,
+    invoice_date: str = "",
 ) -> Bill:
     if settings.erp_backend == "mcp":
         data = _mcp_tool(
@@ -138,7 +142,9 @@ def create_bill(
             },
         )
         bill = _bill_from_dict(data)
-        _BILLS[bill.id] = bill  # mirror for list_bills/audit in-process
+        bill.case_id = case_id
+        bill.invoice_date = invoice_date
+        _BILLS_MEM[bill.id] = bill
         return bill
 
     bill = Bill(
@@ -149,9 +155,33 @@ def create_bill(
         currency=currency,
         status="pending_payment",
         created_at=datetime.now(timezone.utc).isoformat(),
+        case_id=case_id,
+        invoice_date=invoice_date,
     )
-    _BILLS[bill.id] = bill
+    _BILLS_MEM[bill.id] = bill
     return bill
+
+
+async def persist_bill(session, bill: Bill) -> None:
+    """Write bill to SQLite so it survives restarts."""
+    from app.db import BillRow, now
+
+    existing = await session.get(BillRow, bill.id)
+    if existing:
+        return
+    row = BillRow(
+        id=bill.id,
+        case_id=bill.case_id,
+        vendor_name=bill.vendor_name,
+        invoice_number=bill.invoice_number,
+        total=bill.total,
+        currency=bill.currency,
+        status=bill.status,
+        invoice_date=bill.invoice_date or "",
+        created_at=now(),
+    )
+    session.add(row)
+    await session.commit()
 
 
 def flag_anomaly(bill_id: str, reason: str, severity: str = "medium") -> dict:
@@ -165,13 +195,13 @@ def flag_anomaly(bill_id: str, reason: str, severity: str = "medium") -> dict:
             bill_id=str(data["bill_id"]),
             reason=str(data["reason"]),
             severity=str(data.get("severity") or severity),
-            created_at=str(data.get("created_at") or datetime.now(timezone.utc).isoformat()),
+            created_at=str(
+                data.get("created_at") or datetime.now(timezone.utc).isoformat()
+            ),
         )
         _ANOMALIES[anomaly.id] = anomaly
         return asdict(anomaly)
 
-    if bill_id not in _BILLS and not bill_id.startswith("BILL-"):
-        pass
     anomaly = Anomaly(
         id=f"ANOM-{uuid4().hex[:8].upper()}",
         bill_id=bill_id,
@@ -184,18 +214,7 @@ def flag_anomaly(bill_id: str, reason: str, severity: str = "medium") -> dict:
 
 
 def list_bills() -> list[Bill]:
-    if settings.erp_backend == "mcp":
-        try:
-            data = _mcp_tool("erp_list_bills", {})
-            bills = data.get("bills") or []
-            out = [_bill_from_dict(b) for b in bills]
-            _BILLS.clear()
-            for b in out:
-                _BILLS[b.id] = b
-            return out
-        except Exception:  # noqa: BLE001 — fall back to mirror
-            return list(_BILLS.values())
-    return list(_BILLS.values())
+    return list(_BILLS_MEM.values())
 
 
 def list_anomalies() -> list[Anomaly]:
@@ -203,13 +222,12 @@ def list_anomalies() -> list[Anomaly]:
 
 
 def get_bill(bill_id: str) -> Bill | None:
-    return _BILLS.get(bill_id)
+    return _BILLS_MEM.get(bill_id)
 
 
 def reset_erp_state() -> None:
-    """Test helper — clears in-process state and MCP subprocess."""
     global _MCP_PROC
-    _BILLS.clear()
+    _BILLS_MEM.clear()
     _ANOMALIES.clear()
     with _MCP_LOCK:
         if _MCP_PROC is not None and _MCP_PROC.poll() is None:
@@ -247,7 +265,6 @@ MCP_TOOLS = [
         "name": "erp_flag_anomaly",
         "description": (
             "Flag a bill or case for fraud/duplicate/policy anomaly review. "
-            "Use when POL-001/002/004 risks fire or human notes suspicion. "
             "Required: bill_id, reason. Optional: severity (low|medium|high)."
         ),
         "input_schema": {

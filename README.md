@@ -5,16 +5,17 @@
 [![Live Demo](https://img.shields.io/badge/demo-live-success)](https://clearance-1k8l.onrender.com)
 [![Python](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/)
 
-### Multi-agent document operations for back-office work  
-**Invoices & claims in → policy checks → auto-post or human review → audited ERP action**
+### Multi-agent AP document operations (usable product)  
+**Invoices in → extract → policy → auto-post or human edit/approve → durable bills + CSV export**
 
 | | |
 | --- | --- |
 | **Live demo** | **[https://clearance-1k8l.onrender.com](https://clearance-1k8l.onrender.com)** |
+| **Self-host guide** | **[docs/USER_GUIDE.md](docs/USER_GUIDE.md)** |
 | **Author** | [SumithShet18](https://github.com/SumithShet18) |
-| **Cold start** | Free Render tier may take 30–60s on first open |
+| **Version** | **1.0.0** product (single-tenant) |
 
-> **Not a chatbot.** Clearance is a production-shaped **agent system** that *finishes document work*, with human-in-the-loop only when risk is high.
+> **Not a chatbot.** Clearance is an **AP workspace** a clerk can run: upload PDF/image/text, review exceptions, post bills, export CSV. Demo tools optional.
 
 ---
 
@@ -209,18 +210,22 @@ Technical inventory for hiring managers: **[docs/WHAT_I_BUILT.md](docs/WHAT_I_BU
 
 ---
 
-## Quick start (local)
+## Quick start (product)
 
 ```bash
-cd apps/api
-python -m venv .venv
-# Windows: .venv\Scripts\activate
-source .venv/bin/activate   # macOS/Linux
+# Docker (recommended for real use)
+export CLEARANCE_PASSWORD=your-password
+export CLEARANCE_DEMO=false
+docker compose up --build
+
+# Or local API
+cd apps/api && python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 uvicorn app.main:app --reload --port 8000
 ```
 
-Open http://127.0.0.1:8000  
+Open http://127.0.0.1:8000 → **Upload invoice** · **Needs review** · **Bills CSV** · **Settings**  
+Full guide: [docs/USER_GUIDE.md](docs/USER_GUIDE.md)
 
 ```bash
 # tests

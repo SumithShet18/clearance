@@ -25,10 +25,56 @@ from app.models.schemas import (
     TaskLedger,
     ValidationResult,
 )
-from app.services.erp import create_bill, flag_anomaly
+from app.services.erp import create_bill, flag_anomaly, persist_bill
 from app.services.extractor import extract_invoice
-from app.services.policy import apply_policy, retrieve_policies
+from app.services.policy import apply_policy, retrieve_policies, set_runtime_policy
 from app.services.traces import emit_span
+
+
+async def _load_policy_runtime(session: AsyncSession) -> None:
+    try:
+        from app.db import get_or_create_settings, loads as jloads
+
+        s = await get_or_create_settings(session)
+        vendors = jloads(s.known_vendors_json, [])
+        currencies = jloads(s.allowed_currencies_json, ["USD"])
+        set_runtime_policy(
+            known_vendors=vendors if isinstance(vendors, list) else [],
+            high_value=s.high_value_threshold,
+            unknown_vendor_amount=s.unknown_vendor_threshold,
+            allowed_currencies=currencies if isinstance(currencies, list) else ["USD"],
+        )
+        # also refresh HITL threshold from settings
+        settings.confidence_hitl_threshold = s.confidence_hitl_threshold
+    except Exception:  # noqa: BLE001
+        pass
+
+
+async def _is_duplicate(
+    session: AsyncSession, vendor: str, invoice_number: str, exclude_case_id: str
+) -> bool:
+    """POL-004: same vendor + invoice # already acted."""
+    if not vendor or not invoice_number or invoice_number == "INV-UNKNOWN":
+        return False
+    from sqlalchemy import select
+
+    from app.db import CaseRow, loads as jloads
+
+    result = await session.execute(
+        select(CaseRow).where(CaseRow.status == CaseStatus.acted.value)
+    )
+    vnorm = vendor.strip().lower()
+    inorm = invoice_number.strip().lower()
+    for row in result.scalars().all():
+        if row.id == exclude_case_id:
+            continue
+        ext = jloads(row.extraction_json, {})
+        if (
+            str(ext.get("vendor_name", "")).strip().lower() == vnorm
+            and str(ext.get("invoice_number", "")).strip().lower() == inorm
+        ):
+            return True
+    return False
 
 
 def _step(
@@ -67,7 +113,9 @@ def overall_confidence(ext: InvoiceExtraction) -> float:
     return sum(scores) / len(scores) if scores else 0.0
 
 
-def validate_extraction(ext: InvoiceExtraction) -> ValidationResult:
+def validate_extraction(
+    ext: InvoiceExtraction, *, is_duplicate: bool = False
+) -> ValidationResult:
     issues: list[str] = []
     schema_ok = True
     math_ok = True
@@ -94,10 +142,10 @@ def validate_extraction(ext: InvoiceExtraction) -> ValidationResult:
             )
             math_ok = False
 
-    policy_issues = apply_policy(ext.vendor_name, ext.total, ext.currency)
+    policy_issues = apply_policy(
+        ext.vendor_name, ext.total, ext.currency, is_duplicate=is_duplicate
+    )
     issues.extend(policy_issues)
-    policy_ok = not any(i.startswith("POL-") for i in policy_issues) or not policy_issues
-    # policy issues still count as issues; policy_ok false if any POL
     policy_ok = len(policy_issues) == 0
 
     return ValidationResult(
@@ -127,6 +175,8 @@ def decide(
         return Decision.hold, "Unknown vendor policy", True
     if any("POL-005" in i for i in validation.issues):
         return Decision.hold, "Currency policy", True
+    if any("POL-004" in i for i in validation.issues):
+        return Decision.hold, "Duplicate invoice policy", True
     if not validation.ok:
         return Decision.hold, "Validation issues remain", True
     return Decision.approve, "All checks passed — auto-approve", False
@@ -138,12 +188,13 @@ async def run_pipeline(session: AsyncSession, case: CaseRow) -> CaseRow:
     total_cost = 0.0
     total_tokens = 0
 
+    await _load_policy_runtime(session)
+
     case.status = CaseStatus.running.value
     case.updated_at = now()
 
     cid = case.id
     doc_kind = "claim" if "claim" in (case.filename or "").lower() else "invoice"
-
     # 1. Ingest
     steps.append(
         _step(
@@ -212,8 +263,11 @@ async def run_pipeline(session: AsyncSession, case: CaseRow) -> CaseRow:
     progress.completed_steps.append("extract")
     progress.current_step = "validate"
 
-    # 4. Validate
-    validation = validate_extraction(extraction)
+    # 4. Validate (+ duplicate check)
+    is_dup = await _is_duplicate(
+        session, extraction.vendor_name, extraction.invoice_number, case.id
+    )
+    validation = validate_extraction(extraction, is_duplicate=is_dup)
     steps.append(
         _step(
             "validate",
@@ -306,7 +360,10 @@ async def run_pipeline(session: AsyncSession, case: CaseRow) -> CaseRow:
         invoice_number=extraction.invoice_number,
         total=extraction.total,
         currency=extraction.currency,
+        case_id=case.id,
+        invoice_date=extraction.invoice_date or "",
     )
+    await persist_bill(session, bill)
     case.erp_bill_id = bill.id
     steps.append(
         _step(
@@ -405,7 +462,10 @@ async def apply_review(
         invoice_number=extraction.invoice_number,
         total=extraction.total,
         currency=extraction.currency,
+        case_id=case.id,
+        invoice_date=extraction.invoice_date or "",
     )
+    await persist_bill(session, bill)
     case.erp_bill_id = bill.id
     case.decision = Decision.approve.value
     case.status = CaseStatus.acted.value

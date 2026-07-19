@@ -1,15 +1,34 @@
 const $ = (sel, el = document) => el.querySelector(sel);
 
+let selectedId = null;
+let filterStatus = "needs_review";
+let filterQ = "";
+let demoMode = true;
+let authRequired = false;
+
 async function api(path, opts = {}) {
-  const res = await fetch(path, opts);
+  const res = await fetch(path, {
+    credentials: "include",
+    ...opts,
+    headers: {
+      ...(opts.body && !(opts.body instanceof FormData)
+        ? { "Content-Type": "application/json" }
+        : {}),
+      ...(opts.headers || {}),
+    },
+  });
+  if (res.status === 401) {
+    showLogin(true);
+    throw new Error("Authentication required");
+  }
   if (!res.ok) {
     const t = await res.text();
     throw new Error(t || res.statusText);
   }
-  return res.json();
+  const ct = res.headers.get("content-type") || "";
+  if (ct.includes("application/json")) return res.json();
+  return res;
 }
-
-let selectedId = null;
 
 function toast(msg) {
   const el = $("#toast");
@@ -19,57 +38,149 @@ function toast(msg) {
   toast._t = setTimeout(() => el.classList.add("hidden"), 3200);
 }
 
+function showLogin(on) {
+  $("#loginGate").classList.toggle("hidden", !on);
+  $("#appRoot").classList.toggle("hidden", on);
+}
+
+function showView(name) {
+  $("#viewInbox").classList.toggle("hidden", name !== "inbox");
+  $("#viewBills").classList.toggle("hidden", name !== "bills");
+  $("#viewSettings").classList.toggle("hidden", name !== "settings");
+}
+
 async function boot() {
+  const status = await api("/api/auth/status");
+  authRequired = !!status.auth_required;
+  demoMode = !!status.demo_mode;
+
+  if (authRequired) {
+    $("#btnLogout").classList.remove("hidden");
+    try {
+      await api("/api/health");
+      showLogin(false);
+    } catch {
+      showLogin(true);
+      return;
+    }
+  } else {
+    showLogin(false);
+  }
+
   const health = await api("/api/health");
   $("#modeBadge").textContent = `mode: ${health.mode}`;
   if (health.version) $("#verBadge").textContent = `v${health.version}`;
-  await Promise.all([refreshMetrics(), refreshSamples(), refreshCases(), maybeEval()]);
+
+  if (demoMode) {
+    $("#btnSeed").classList.remove("hidden");
+    $("#btnEval").classList.remove("hidden");
+    $("#btnBench").classList.remove("hidden");
+    $("#footerDemo").classList.remove("hidden");
+    $("#samplesHead").classList.remove("hidden");
+  }
+
   $("#fileInput").addEventListener("change", onUpload);
-  $("#btnEval").addEventListener("click", async () => {
-    $("#btnEval").disabled = true;
-    try {
-      await maybeEval(true);
-    } finally {
-      $("#btnEval").disabled = false;
-    }
-  });
-  $("#btnBench").addEventListener("click", runBench);
   $("#btnSeed").addEventListener("click", seedDemo);
+  $("#btnEval").addEventListener("click", runEval);
+  $("#btnBench").addEventListener("click", runBench);
+  $("#btnExportBills").addEventListener("click", exportBillsCsv);
+  $("#btnExportBills2").addEventListener("click", exportBillsCsv);
+  $("#btnNavInbox").addEventListener("click", () => {
+    showView("inbox");
+    refreshCases();
+  });
+  $("#btnNavBills").addEventListener("click", () => {
+    showView("bills");
+    loadBills();
+  });
+  $("#btnNavSettings").addEventListener("click", () => {
+    showView("settings");
+    loadSettings();
+  });
+  $("#btnSaveSettings").addEventListener("click", saveSettings);
+  $("#btnLogin").addEventListener("click", doLogin);
+  $("#loginPassword").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") doLogin();
+  });
+  $("#btnLogout").addEventListener("click", doLogout);
+  $("#caseSearch").addEventListener("input", (e) => {
+    filterQ = e.target.value.trim();
+    refreshCases();
+  });
+  document.querySelectorAll("#statusTabs .tab").forEach((tab) => {
+    tab.addEventListener("click", () => {
+      document.querySelectorAll("#statusTabs .tab").forEach((t) => t.classList.remove("active"));
+      tab.classList.add("active");
+      filterStatus = tab.dataset.status || "";
+      refreshCases();
+    });
+  });
+
+  await Promise.all([refreshMetrics(), refreshSamples(), refreshCases(), refreshBillCount()]);
+}
+
+async function doLogin() {
+  const password = $("#loginPassword").value;
+  try {
+    const r = await api("/api/auth/login", {
+      method: "POST",
+      body: JSON.stringify({ password }),
+    });
+    if (!r.ok) {
+      $("#loginHint").textContent = r.detail || "Invalid password";
+      return;
+    }
+    showLogin(false);
+    await boot();
+  } catch (e) {
+    $("#loginHint").textContent = e.message;
+  }
+}
+
+async function doLogout() {
+  await api("/api/auth/logout", { method: "POST" });
+  if (authRequired) showLogin(true);
+  toast("Signed out");
 }
 
 async function runBench() {
   const btn = $("#btnBench");
   btn.disabled = true;
-  btn.textContent = "Benchmarking…";
   try {
     const r = await api("/api/evals/benchmark?source=synthetic&limit=50");
-    const pf = r.per_field || {};
-    toast(
-      `Bench ${r.cases} docs · micro ${pct(r.micro_field_accuracy)} · vendor ${pct(pf.vendor)} · total ${pct(pf.total)}`
-    );
-    $("#mEval").textContent = pct(r.micro_field_accuracy);
+    toast(`Bench ${r.cases} docs · micro ${pct(r.micro_field_accuracy)}`);
   } catch (e) {
     toast(`Bench failed: ${e.message}`);
   } finally {
     btn.disabled = false;
-    btn.textContent = "Run Clearance Bench (50)";
+  }
+}
+
+async function runEval() {
+  try {
+    const e = await api("/api/evals/run");
+    toast(`Gold eval · field ${pct(e.field_accuracy)}`);
+  } catch (e) {
+    toast(e.message);
   }
 }
 
 async function seedDemo() {
   const btn = $("#btnSeed");
   btn.disabled = true;
-  btn.textContent = "Seeding…";
   try {
     const r = await api("/api/demo/seed", { method: "POST" });
-    toast(`Seeded ${r.seeded} cases through the full agent pipeline`);
-    await Promise.all([refreshMetrics(), refreshCases(), maybeEval()]);
+    toast(`Seeded ${r.seeded} cases`);
+    filterStatus = "";
+    document.querySelectorAll("#statusTabs .tab").forEach((t) => {
+      t.classList.toggle("active", (t.dataset.status || "") === "");
+    });
+    await Promise.all([refreshMetrics(), refreshCases(), refreshBillCount()]);
     if (r.cases?.length) await selectCase(r.cases[r.cases.length - 1].id);
   } catch (e) {
     toast(`Seed failed: ${e.message}`);
   } finally {
     btn.disabled = false;
-    btn.textContent = "▶ One-click demo seed";
   }
 }
 
@@ -82,25 +193,21 @@ async function refreshMetrics() {
   $("#mConf").textContent = pct(m.avg_confidence);
 }
 
-async function maybeEval(force = false) {
+async function refreshBillCount() {
   try {
-    const e = await api("/api/evals/run");
-    $("#mEval").textContent = pct(e.field_accuracy);
-    if (force) {
-      toast(
-        `Gold eval · ${e.cases} cases · field ${pct(e.field_accuracy)} · total ${pct(e.total_match_rate)} · vendor ${pct(e.vendor_match_rate)}`
-      );
-    }
+    const bills = await api("/api/bills");
+    $("#mEval").textContent = bills.length;
   } catch {
-    $("#mEval").textContent = "n/a";
+    $("#mEval").textContent = "—";
   }
 }
 
 async function refreshSamples() {
-  const samples = await api("/api/samples");
   const box = $("#samples");
   box.innerHTML = "";
-  for (const name of samples) {
+  if (!demoMode) return;
+  const samples = await api("/api/samples");
+  for (const name of samples.slice(0, 12)) {
     const btn = document.createElement("button");
     btn.className = "item";
     btn.innerHTML = `<div class="title">${escapeHtml(name)}</div><div class="meta">run sample</div>`;
@@ -110,9 +217,17 @@ async function refreshSamples() {
 }
 
 async function refreshCases() {
-  const cases = await api("/api/cases");
+  const params = new URLSearchParams();
+  if (filterStatus) params.set("status", filterStatus);
+  if (filterQ) params.set("q", filterQ);
+  const qs = params.toString() ? `?${params}` : "";
+  const cases = await api(`/api/cases${qs}`);
   const box = $("#caseList");
   box.innerHTML = "";
+  if (!cases.length) {
+    box.innerHTML = `<div class="hint">No cases in this queue.</div>`;
+    return;
+  }
   for (const c of cases) {
     const btn = document.createElement("button");
     btn.className = "item" + (c.id === selectedId ? " active" : "");
@@ -129,11 +244,13 @@ async function refreshCases() {
 }
 
 async function runSample(name) {
-  const created = await api(`/api/cases/from-sample/${name.split("/").map(encodeURIComponent).join("/")}`, {
-    method: "POST",
-  });
+  const created = await api(
+    `/api/cases/from-sample/${name.split("/").map(encodeURIComponent).join("/")}`,
+    { method: "POST" }
+  );
   selectedId = created.id;
   toast(`${name} → ${created.status}`);
+  filterStatus = created.status === "needs_review" ? "needs_review" : "";
   await Promise.all([refreshCases(), refreshMetrics(), selectCase(created.id)]);
 }
 
@@ -142,20 +259,33 @@ async function onUpload(e) {
   if (!file) return;
   const fd = new FormData();
   fd.append("file", file);
-  const res = await fetch("/api/cases", { method: "POST", body: fd });
-  if (!res.ok) {
-    toast(await res.text());
-    return;
+  try {
+    const res = await fetch("/api/cases", { method: "POST", body: fd, credentials: "include" });
+    if (res.status === 401) {
+      showLogin(true);
+      return;
+    }
+    if (!res.ok) {
+      toast(await res.text());
+      return;
+    }
+    const created = await res.json();
+    selectedId = created.id;
+    e.target.value = "";
+    toast(`Uploaded → ${created.status}`);
+    filterStatus = created.status === "needs_review" ? "needs_review" : created.status;
+    document.querySelectorAll("#statusTabs .tab").forEach((t) => {
+      t.classList.toggle("active", (t.dataset.status || "") === filterStatus);
+    });
+    await Promise.all([refreshCases(), refreshMetrics(), refreshBillCount(), selectCase(created.id)]);
+  } catch (err) {
+    toast(err.message);
   }
-  const created = await res.json();
-  selectedId = created.id;
-  e.target.value = "";
-  toast(`Uploaded → ${created.status}`);
-  await Promise.all([refreshCases(), refreshMetrics(), selectCase(created.id)]);
 }
 
 async function selectCase(id) {
   selectedId = id;
+  showView("inbox");
   await refreshCases();
   const c = await api(`/api/cases/${id}`);
   const root = $("#detail");
@@ -163,6 +293,7 @@ async function selectCase(id) {
   const steps = c.steps || [];
   const validation = c.validation || {};
   const needsReview = c.status === "needs_review";
+  const lines = ext.line_items || [];
 
   root.innerHTML = `
     <div class="detail-head">
@@ -171,32 +302,74 @@ async function selectCase(id) {
         <div class="meta">
           <span class="status ${c.status}">${c.status}</span>
           ${c.decision ? `<span class="badge muted">${c.decision}</span>` : ""}
-          ${c.erp_bill_id ? `<span class="badge">ERP ${escapeHtml(c.erp_bill_id)}</span>` : ""}
+          ${c.erp_bill_id ? `<span class="badge">Bill ${escapeHtml(c.erp_bill_id)}</span>` : ""}
         </div>
       </div>
       <div class="detail-actions">
-        <button class="btn ghost" id="btnExport">Export audit JSON</button>
+        <button class="btn ghost" id="btnExport">Export audit</button>
+        <button class="btn ghost" id="btnArchive">Archive</button>
         <span class="badge muted">${escapeHtml(c.filename)}</span>
       </div>
     </div>
 
+    ${
+      needsReview
+        ? `
+    <div class="review-box">
+      <h3>Review & correct fields</h3>
+      <p class="detail">${escapeHtml(c.progress_ledger?.human_reason || "Confirm fields before posting.")}</p>
+      <div class="form-grid">
+        <label>Vendor <input id="fVendor" value="${escapeAttr(ext.vendor_name || "")}" /></label>
+        <label>Invoice # <input id="fInv" value="${escapeAttr(ext.invoice_number || "")}" /></label>
+        <label>Date <input id="fDate" value="${escapeAttr(ext.invoice_date || "")}" /></label>
+        <label>Currency <input id="fCur" value="${escapeAttr(ext.currency || "USD")}" /></label>
+        <label>Subtotal <input id="fSub" type="number" step="0.01" value="${ext.subtotal ?? 0}" /></label>
+        <label>Tax <input id="fTax" type="number" step="0.01" value="${ext.tax ?? 0}" /></label>
+        <label>Total <input id="fTotal" type="number" step="0.01" value="${ext.total ?? 0}" /></label>
+        <label>Note <input id="reviewNote" placeholder="Optional audit note" /></label>
+      </div>
+      <div class="review-actions">
+        <button class="btn" id="btnApproveEdit">Save & post bill</button>
+        <button class="btn secondary" id="btnApprove">Approve as-is</button>
+        <button class="btn secondary" id="btnReject">Reject</button>
+      </div>
+    </div>`
+        : `
     <div class="kv">
       <div class="card"><div class="l">Invoice #</div><div class="v">${escapeHtml(ext.invoice_number || "—")}</div></div>
-      <div class="card"><div class="l">Total</div><div class="v">${ext.total != null ? money(ext.total) : "—"} ${escapeHtml(ext.currency || "")}</div></div>
+      <div class="card"><div class="l">Total</div><div class="v">${ext.total != null ? money(ext.total, ext.currency) : "—"}</div></div>
       <div class="card"><div class="l">Confidence</div><div class="v">${c.overall_confidence != null ? pct(c.overall_confidence) : "—"}</div></div>
       <div class="card"><div class="l">Date</div><div class="v">${escapeHtml(ext.invoice_date || "—")}</div></div>
-    </div>
+    </div>`
+    }
+
+    ${
+      lines.length
+        ? `<h3 class="sub">Line items</h3>
+      <table class="lines"><thead><tr><th>Description</th><th>Qty</th><th>Amount</th></tr></thead>
+      <tbody>${lines
+        .map(
+          (li) =>
+            `<tr><td>${escapeHtml(li.description || "")}</td><td>${li.quantity ?? ""}</td><td>${money(li.amount || 0, ext.currency)}</td></tr>`
+        )
+        .join("")}</tbody></table>`
+        : ""
+    }
 
     <h3 class="sub">Agent timeline</h3>
     <div class="timeline">
-      ${steps.map((s) => `
+      ${steps
+        .map(
+          (s) => `
         <div class="step ${s.status}">
           <div class="name">${escapeHtml(s.name)}</div>
           <div>
             <div><span class="status ${s.status}">${s.status}</span></div>
             <div class="detail">${escapeHtml(s.detail || "")}</div>
           </div>
-        </div>`).join("")}
+        </div>`
+        )
+        .join("")}
     </div>
 
     <h3 class="sub">Validation</h3>
@@ -207,52 +380,28 @@ async function selectCase(id) {
     </div>
     ${(validation.issues || []).length ? `<pre class="audit">${escapeHtml((validation.issues || []).join("\n"))}</pre>` : ""}
 
-    ${needsReview ? `
-      <div class="review-box">
-        <h3>Human-in-the-loop required</h3>
-        <p class="detail">${escapeHtml(c.progress_ledger?.human_reason || "Review required before ERP writeback.")}</p>
-        <label class="sub">Note</label>
-        <input type="text" id="reviewNote" placeholder="Optional note for audit trail" />
-        <div class="review-actions">
-          <button class="btn" id="btnApprove">Approve → create ERP bill</button>
-          <button class="btn secondary" id="btnReject">Reject</button>
-        </div>
-      </div>` : ""}
-
-    <h3 class="sub">Observability spans</h3>
-    <pre class="audit" id="traceBox">Loading traces…</pre>
+    <h3 class="sub">Document preview</h3>
+    <pre class="audit">${escapeHtml(c.content_preview || "")}</pre>
 
     <h3 class="sub">Audit log</h3>
     <pre class="audit">${escapeHtml(JSON.stringify(c.audit || [], null, 2))}</pre>
-
-    <h3 class="sub">Task ledger (Magentic-One style)</h3>
-    <pre class="audit">${escapeHtml(JSON.stringify(c.task_ledger || {}, null, 2))}</pre>
   `;
 
   $("#btnExport").onclick = () => exportAudit(id);
+  $("#btnArchive").onclick = () => archiveCase(id);
   if (needsReview) {
     $("#btnApprove").onclick = () => review(id, "approve");
+    $("#btnApproveEdit").onclick = () => review(id, "edit_and_approve", true);
     $("#btnReject").onclick = () => review(id, "reject");
   }
-  loadTraces(id);
 }
 
-async function loadTraces(id) {
-  try {
-    const t = await api(`/api/cases/${id}/traces`);
-    const box = $("#traceBox");
-    if (!box) return;
-    if (!t.spans?.length) {
-      box.textContent = "No spans yet.";
-      return;
-    }
-    box.textContent = t.spans
-      .map((s) => `${s.ts}  ${s.name.padEnd(16)} ${s.status.padEnd(10)} ${s.detail || ""}`)
-      .join("\n");
-  } catch {
-    const box = $("#traceBox");
-    if (box) box.textContent = "Traces unavailable.";
-  }
+async function archiveCase(id) {
+  await api(`/api/cases/${id}/archive`, { method: "POST" });
+  toast("Case archived");
+  selectedId = null;
+  $("#detail").innerHTML = `<div class="empty"><h2>Case archived</h2><p>Select another case or upload a new invoice.</p></div>`;
+  await Promise.all([refreshCases(), refreshMetrics()]);
 }
 
 async function exportAudit(id) {
@@ -263,26 +412,126 @@ async function exportAudit(id) {
   a.download = `clearance-audit-${id.slice(0, 8)}.json`;
   a.click();
   URL.revokeObjectURL(a.href);
-  toast("Audit bundle downloaded");
+  toast("Audit downloaded");
 }
 
-async function review(id, action) {
+async function review(id, action, withEdit = false) {
   const note = $("#reviewNote")?.value || "";
+  let body = { action, note };
+  if (withEdit || action === "edit_and_approve") {
+    body.action = "edit_and_approve";
+    body.extraction = {
+      vendor_name: $("#fVendor").value,
+      invoice_number: $("#fInv").value,
+      invoice_date: $("#fDate").value,
+      currency: $("#fCur").value || "USD",
+      subtotal: parseFloat($("#fSub").value) || 0,
+      tax: parseFloat($("#fTax").value) || 0,
+      total: parseFloat($("#fTotal").value) || 0,
+      vendor_confidence: 1,
+      invoice_number_confidence: 1,
+      invoice_date_confidence: 1,
+      total_confidence: 1,
+      line_items: [],
+      raw_notes: "human-edited",
+    };
+  }
   await api(`/api/cases/${id}/review`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ action, note }),
+    body: JSON.stringify(body),
   });
-  toast(action === "reject" ? "Case rejected" : "Approved — ERP bill created");
-  await Promise.all([refreshCases(), refreshMetrics(), selectCase(id)]);
+  toast(action === "reject" ? "Rejected" : "Posted — bill created");
+  await Promise.all([refreshCases(), refreshMetrics(), refreshBillCount(), selectCase(id)]);
+}
+
+async function loadBills() {
+  const bills = await api("/api/bills");
+  const box = $("#billsTable");
+  if (!bills.length) {
+    box.innerHTML = `<p class="hint">No bills yet. Approve a case to post.</p>`;
+    return;
+  }
+  box.innerHTML = `
+    <table class="lines">
+      <thead><tr>
+        <th>Bill</th><th>Vendor</th><th>Invoice #</th><th>Date</th><th>Total</th><th>Status</th>
+      </tr></thead>
+      <tbody>
+        ${bills
+          .map(
+            (b) => `<tr>
+          <td>${escapeHtml(b.id)}</td>
+          <td>${escapeHtml(b.vendor_name)}</td>
+          <td>${escapeHtml(b.invoice_number)}</td>
+          <td>${escapeHtml(b.invoice_date || "—")}</td>
+          <td>${money(b.total, b.currency)}</td>
+          <td>${escapeHtml(b.status)}</td>
+        </tr>`
+          )
+          .join("")}
+      </tbody>
+    </table>`;
+}
+
+async function exportBillsCsv() {
+  const res = await fetch("/api/bills/export.csv", { credentials: "include" });
+  if (!res.ok) {
+    toast("Export failed");
+    return;
+  }
+  const blob = await res.blob();
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "clearance-bills.csv";
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast("Bills CSV downloaded");
+}
+
+async function loadSettings() {
+  const s = await api("/api/settings");
+  $("#setCompany").value = s.company_name || "";
+  $("#setVendors").value = (s.known_vendors || []).join("\n");
+  $("#setHigh").value = s.high_value_threshold;
+  $("#setUnk").value = s.unknown_vendor_threshold;
+  $("#setConf").value = s.confidence_hitl_threshold;
+  $("#setCurr").value = (s.allowed_currencies || []).join(", ");
+  $("#companyTag").textContent = s.company_name || "AP document operations";
+}
+
+async function saveSettings() {
+  const body = {
+    company_name: $("#setCompany").value,
+    known_vendors: $("#setVendors").value
+      .split("\n")
+      .map((x) => x.trim())
+      .filter(Boolean),
+    high_value_threshold: parseFloat($("#setHigh").value),
+    unknown_vendor_threshold: parseFloat($("#setUnk").value),
+    confidence_hitl_threshold: parseFloat($("#setConf").value),
+    allowed_currencies: $("#setCurr").value
+      .split(",")
+      .map((x) => x.trim().toUpperCase())
+      .filter(Boolean),
+  };
+  await api("/api/settings", { method: "PUT", body: JSON.stringify(body) });
+  toast("Settings saved");
+  $("#companyTag").textContent = body.company_name;
 }
 
 function pct(n) {
   if (n == null || Number.isNaN(n)) return "—";
   return `${Math.round(n * 1000) / 10}%`;
 }
-function money(n) {
-  return new Intl.NumberFormat(undefined, { style: "currency", currency: "USD" }).format(n);
+function money(n, currency = "USD") {
+  try {
+    return new Intl.NumberFormat(undefined, {
+      style: "currency",
+      currency: currency || "USD",
+    }).format(n);
+  } catch {
+    return `${n} ${currency || ""}`;
+  }
 }
 function escapeHtml(s) {
   return String(s)
@@ -291,8 +540,13 @@ function escapeHtml(s) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;");
 }
+function escapeAttr(s) {
+  return escapeHtml(s).replaceAll("'", "&#39;");
+}
 
 boot().catch((e) => {
   console.error(e);
-  $("#detail").innerHTML = `<div class="empty"><h2>API error</h2><p>${escapeHtml(e.message)}</p></div>`;
+  if (!authRequired) {
+    $("#detail").innerHTML = `<div class="empty"><h2>API error</h2><p>${escapeHtml(e.message)}</p></div>`;
+  }
 });

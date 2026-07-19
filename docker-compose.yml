@@ -4,7 +4,13 @@ services:
     ports:
       - "8000:8000"
     environment:
-      CLEARANCE_MODE: mock
+      CLEARANCE_MODE: ${CLEARANCE_MODE:-mock}
+      CLEARANCE_DEMO: ${CLEARANCE_DEMO:-false}
+      CLEARANCE_PASSWORD: ${CLEARANCE_PASSWORD:-}
+      CLEARANCE_ERP: ${CLEARANCE_ERP:-mock}
+      SESSION_SECRET: ${SESSION_SECRET:-change-me-in-production}
+      RATE_LIMIT_PER_MINUTE: ${RATE_LIMIT_PER_MINUTE:-60}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
     volumes:
       - clearance-data:/app/data
     restart: unless-stopped

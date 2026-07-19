@@ -13,16 +13,23 @@ class Settings(BaseSettings):
     openai_api_key: str = ""
     openai_model: str = "gpt-4o-mini"
     clearance_mode: str = "mock"  # mock | llm
-    # ERP backend: in-process mock | MCP stdio server (mcp-servers/erp/server.py)
+    # ERP backend: in-process mock | MCP stdio server
     clearance_erp: str = "mock"  # mock | mcp
+    # Product: show demo seed/bench UI and endpoints
+    clearance_demo: bool = True
+    # Single-tenant password; empty = open access (dev/demo)
+    clearance_password: str = ""
+    # Session secret for signed cookies
+    session_secret: str = "clearance-dev-secret-change-me"
     database_url: str = f"sqlite+aiosqlite:///{_DB.as_posix()}"
     upload_dir: str = str(_UPLOADS)
     confidence_hitl_threshold: float = 0.85
-    # Public demo hardening: mutating requests per IP per window (0 = off)
-    rate_limit_per_minute: int = 30
-    # Optional shared secret: X-Clearance-Key bypasses rate limit; if require_demo_key, required for writes
+    rate_limit_per_minute: int = 60
     demo_api_key: str = ""
     require_demo_key: bool = False
+    # Policy defaults (overridden by SettingsRow in DB when present)
+    high_value_threshold: float = 10_000.0
+    unknown_vendor_threshold: float = 500.0
 
     @property
     def use_llm(self) -> bool:
@@ -31,6 +38,10 @@ class Settings(BaseSettings):
     @property
     def erp_backend(self) -> str:
         return "mcp" if self.clearance_erp.lower() == "mcp" else "mock"
+
+    @property
+    def auth_required(self) -> bool:
+        return bool(self.clearance_password.strip())
 
 
 settings = Settings()

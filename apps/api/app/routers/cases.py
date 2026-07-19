@@ -1,9 +1,8 @@
 from __future__ import annotations
 
-import json
 from pathlib import Path
 
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
@@ -21,6 +20,7 @@ from app.models.schemas import (
     TaskLedger,
     ValidationResult,
 )
+from app.services.ingest import load_upload
 from app.services.pipeline import apply_review, run_pipeline
 
 router = APIRouter(prefix="/api/cases", tags=["cases"])
@@ -43,13 +43,11 @@ def _row_to_summary(row: CaseRow) -> CaseSummary:
 
 
 def _normalize_steps(raw: list) -> list[dict]:
-    """Accept dict steps or recover from legacy stringified dumps."""
     out: list[dict] = []
     for s in raw or []:
         if isinstance(s, dict):
             out.append(s)
         elif isinstance(s, str) and s.startswith("name="):
-            # best-effort skip corrupt legacy rows
             continue
     return out
 
@@ -77,10 +75,13 @@ def _row_to_detail(row: CaseRow) -> CaseDetail:
     )
 
 
-
 @router.get("", response_model=list[CaseSummary])
-async def get_cases(session: AsyncSession = Depends(get_session)):
-    rows = await list_cases(session)
+async def get_cases(
+    status: str | None = Query(None),
+    q: str | None = Query(None),
+    session: AsyncSession = Depends(get_session),
+):
+    rows = await list_cases(session, status=status, q=q)
     return [_row_to_summary(r) for r in rows]
 
 
@@ -88,8 +89,6 @@ async def get_cases(session: AsyncSession = Depends(get_session)):
 async def metrics(session: AsyncSession = Depends(get_session)):
     rows = await list_cases(session)
     total = len(rows)
-    auto = sum(1 for r in rows if r.status == CaseStatus.acted.value and "auto" in (r.audit_json or ""))
-    # auto_resolved ≈ acted without needs_review history; approximate: acted and decision approve with no human_approve
     auto_resolved = sum(
         1
         for r in rows
@@ -130,13 +129,12 @@ async def create_case(
     dest = Path(settings.upload_dir) / f"{case_id}_{filename}"
     dest.write_bytes(raw)
 
-    lower = filename.lower()
-    is_image = lower.endswith((".png", ".jpg", ".jpeg", ".webp", ".gif"))
+    text, meta, is_image = load_upload(dest, filename, raw)
     if is_image:
         from app.services.extractor import extract_from_image
 
-        ext, meta = extract_from_image(str(dest), filename)
-        # Seed content_text from extraction so pipeline re-extracts consistently in mock
+        ext, vmeta = extract_from_image(str(dest), filename)
+        meta = {**meta, **vmeta}
         text = (
             f"Vendor: {ext.vendor_name}\n"
             f"Invoice Number: {ext.invoice_number}\n"
@@ -145,19 +143,9 @@ async def create_case(
             f"Subtotal: {ext.subtotal:.2f}\n"
             f"Tax: {ext.tax:.2f}\n"
             f"Total: {ext.total:.2f}\n"
-            f"# vision_meta={meta.get('mode')}\n"
+            f"# vision_meta={vmeta.get('mode')}\n"
+            f"# notes={ext.raw_notes}\n"
         )
-    else:
-        try:
-            text = raw.decode("utf-8")
-        except UnicodeDecodeError:
-            text = raw.decode("latin-1", errors="replace")
-            if lower.endswith(".pdf"):
-                text = (
-                    f"[Binary PDF upload: {filename}]\n"
-                    "Prefer .txt samples or image upload with CLEARANCE_MODE=llm.\n"
-                    + text[:500]
-                )
 
     row = CaseRow(
         id=case_id,
@@ -167,6 +155,7 @@ async def create_case(
         file_path=str(dest),
         created_at=now(),
         updated_at=now(),
+        archived=0,
     )
     session.add(row)
     await session.commit()
@@ -193,6 +182,7 @@ async def create_from_sample(sample_name: str, session: AsyncSession = Depends(g
         file_path=str(path),
         created_at=now(),
         updated_at=now(),
+        archived=0,
     )
     session.add(row)
     await session.commit()
@@ -219,9 +209,19 @@ async def review_case(
     return _row_to_detail(row)
 
 
+@router.post("/{case_id}/archive")
+async def archive_case(case_id: str, session: AsyncSession = Depends(get_session)):
+    row = await get_case(session, case_id)
+    if not row:
+        raise HTTPException(404, "Case not found")
+    row.archived = 1
+    row.updated_at = now()
+    await session.commit()
+    return {"id": case_id, "archived": True}
+
+
 @router.get("/{case_id}/traces")
 async def case_traces(case_id: str, session: AsyncSession = Depends(get_session)):
-    """JSONL agent spans for observability demos."""
     row = await get_case(session, case_id)
     if not row:
         raise HTTPException(404, "Case not found")
@@ -233,7 +233,6 @@ async def case_traces(case_id: str, session: AsyncSession = Depends(get_session)
 
 @router.get("/{case_id}/export")
 async def export_case(case_id: str, session: AsyncSession = Depends(get_session)):
-    """Full audit bundle for procurement / compliance storytelling."""
     row = await get_case(session, case_id)
     if not row:
         raise HTTPException(404, "Case not found")
@@ -242,7 +241,7 @@ async def export_case(case_id: str, session: AsyncSession = Depends(get_session)
         "case_id": row.id,
         "exported_at": now().isoformat(),
         "product": "Clearance",
-        "version": "0.2.0",
+        "version": "1.0.0",
         "filename": row.filename,
         "status": row.status,
         "decision": row.decision,
@@ -256,5 +255,3 @@ async def export_case(case_id: str, session: AsyncSession = Depends(get_session)
         "steps": detail.steps,
         "audit": detail.audit,
     }
-
-
