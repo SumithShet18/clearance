@@ -139,11 +139,13 @@ From **[evals/REPORT.md](evals/REPORT.md)**:
 
 | Track | What | Result |
 | --- | --- | --- |
-| Synthetic (50) | Field accuracy (with stress cases) | **~97.5%** micro |
+| Synthetic stress (50) | Field accuracy | **~97.5%** micro |
+| **ICDAR SROIE real receipts (50)** | Public labels + OCR transcripts | **~98%** micro (vendor ~92%) |
+| CORD v2 fixtures (25) | HF ground-truth renders | **~100%** micro |
 | Pipeline subset (25) | Auto-acted vs HITL | **~52% STP / ~48% HITL** |
-| CORD v2 fixtures (25) | Public receipt labels (HF) | Track B in REPORT |
 
-STP &lt; 100% is intentional: governance should *not* auto-post high-risk cases.
+STP &lt; 100% is intentional: governance should *not* auto-post high-risk cases.  
+SROIE is a **real public competition dataset** — not only synthetic demos. Full tables: [evals/REPORT.md](evals/REPORT.md).
 
 ---
 
