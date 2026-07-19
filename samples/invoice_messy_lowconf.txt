@@ -1,0 +1,15 @@
+LOWCONF SAMPLE — partial OCR noise
+
+Fr0m: Gl0bex Industr1al ???
+Inv no maybe: GX-??-19
+date ~ 03/18/26
+
+stuff:
+cables x something
+approx total $$ 412.00 ???
+
+Subtotal: 380.00
+Tax: 30.00
+Total: 412.00
+
+Currency: USD

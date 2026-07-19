@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Clearance — Production Multi-Agent DocOps</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="top">
+      <div class="brand">
+        <div class="logo">C</div>
+        <div>
+          <h1>Clearance</h1>
+          <p class="tag">Agents that finish work — measured, governed, reversible</p>
+        </div>
+      </div>
+      <div class="badges">
+        <span class="badge" id="modeBadge">mode: …</span>
+        <span class="badge muted">Phase 1 MVP</span>
+      </div>
+    </header>
+
+    <section class="metrics" id="metrics">
+      <div class="metric"><div class="n" id="mTotal">—</div><div class="l">Cases</div></div>
+      <div class="metric"><div class="n" id="mAuto">—</div><div class="l">Auto-resolved</div></div>
+      <div class="metric"><div class="n" id="mReview">—</div><div class="l">Needs review</div></div>
+      <div class="metric"><div class="n" id="mRate">—</div><div class="l">Auto-resolve rate</div></div>
+      <div class="metric"><div class="n" id="mConf">—</div><div class="l">Avg confidence</div></div>
+      <div class="metric"><div class="n" id="mEval">—</div><div class="l">Gold field accuracy</div></div>
+    </section>
+
+    <div class="grid">
+      <aside class="panel">
+        <h2>Cases</h2>
+        <div class="actions">
+          <label class="btn secondary">
+            Upload invoice
+            <input type="file" id="fileInput" hidden />
+          </label>
+          <button class="btn" id="btnEval">Run gold evals</button>
+        </div>
+        <h3 class="sub">Samples</h3>
+        <div id="samples" class="sample-list"></div>
+        <h3 class="sub">Inbox</h3>
+        <div id="caseList" class="case-list"></div>
+      </aside>
+
+      <main class="panel main" id="detail">
+        <div class="empty">
+          <h2>Select or run a case</h2>
+          <p>Upload a text invoice or click a sample. Watch the multi-agent pipeline:
+            plan → extract → validate → policy → decide → HITL → act → verify.</p>
+          <p class="hint">Clean ACME/Northwind samples often auto-resolve. Messy, high-value, unknown-vendor, and EUR samples trigger human-in-the-loop.</p>
+        </div>
+      </main>
+    </div>
+
+    <footer>
+      <span>Compose: code-orchestrated agent graph · MCP-shaped ERP tools · offline evals · HITL</span>
+      <span>Not another control plane — see <code>docs/COMPETITIVE.md</code></span>
+    </footer>
+  </div>
+  <script src="/static/app.js"></script>
+</body>
+</html>

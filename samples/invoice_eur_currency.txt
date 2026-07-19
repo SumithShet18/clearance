@@ -1,0 +1,15 @@
+Initech Services
+Vendor: Initech Services
+EU Branch — Berlin
+
+Invoice Number: EU-2201
+Invoice Date: 2026-03-01
+Due Date: 2026-03-31
+Currency: EUR
+
+Line items:
+- Consulting hours | 20 | 150.00 | 3000.00
+
+Subtotal: 3000.00
+Tax: 570.00
+Total: 3570.00

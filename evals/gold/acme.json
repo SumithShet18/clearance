@@ -1,0 +1,14 @@
+{
+  "sample": "invoice_acme_clean.txt",
+  "expected": {
+    "vendor_name": "ACME Supplies",
+    "invoice_number": "INV-2026-1042",
+    "invoice_date": "2026-06-01",
+    "due_date": "2026-06-30",
+    "currency": "USD",
+    "subtotal": 985.0,
+    "tax": 78.8,
+    "total": 1063.8,
+    "line_items": []
+  }
+}

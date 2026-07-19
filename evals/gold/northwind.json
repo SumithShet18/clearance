@@ -1,0 +1,14 @@
+{
+  "sample": "invoice_northwind_clean.txt",
+  "expected": {
+    "vendor_name": "Northwind Traders",
+    "invoice_number": "NW-88901",
+    "invoice_date": "2026-05-15",
+    "due_date": "2026-06-15",
+    "currency": "USD",
+    "subtotal": 695.0,
+    "tax": 55.6,
+    "total": 750.6,
+    "line_items": []
+  }
+}

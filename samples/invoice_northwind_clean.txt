@@ -1,0 +1,17 @@
+Northwind Traders
+Vendor: Northwind Traders
+
+Invoice #: NW-88901
+Date: 2026-05-15
+Due Date: 2026-06-15
+Currency: USD
+
+Bill To: Clearance Demo Corp
+
+Line items:
+- Widget A | 100 | 3.20 | 320.00
+- Widget B | 50 | 7.50 | 375.00
+
+Subtotal: 695.00
+Tax: 55.60
+Total: 750.60

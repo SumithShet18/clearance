@@ -1,0 +1,14 @@
+{
+  "sample": "invoice_unknown_highvalue.txt",
+  "expected": {
+    "vendor_name": "Quantum Parts LLC",
+    "invoice_number": "QP-55012",
+    "invoice_date": "2026-04-20",
+    "due_date": "2026-05-20",
+    "currency": "USD",
+    "subtotal": 12500.0,
+    "tax": 1000.0,
+    "total": 13500.0,
+    "line_items": []
+  }
+}

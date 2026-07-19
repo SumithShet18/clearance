@@ -1,0 +1,25 @@
+ACME Supplies
+123 Industrial Way, Austin, TX 78701
+Vendor: ACME Supplies
+
+Bill To:
+Clearance Demo Corp
+1 Market Street
+San Francisco, CA 94105
+
+Invoice Number: INV-2026-1042
+Invoice Date: 2026-06-01
+Due Date: 2026-06-30
+Currency: USD
+
+Line items:
+- Office paper reams | 40 | 12.50 | 500.00
+- Toner cartridges | 10 | 45.00 | 450.00
+- Shipping | 1 | 35.00 | 35.00
+
+Subtotal: 985.00
+Tax: 78.80
+Total: 1063.80
+
+Thank you for your business.
+Payment terms: Net 30

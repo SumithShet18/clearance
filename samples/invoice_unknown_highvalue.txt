@@ -1,0 +1,17 @@
+Quantum Parts LLC
+Vendor: Quantum Parts LLC
+
+Invoice Number: QP-55012
+Invoice Date: 2026-04-20
+Due Date: 2026-05-20
+Currency: USD
+
+Line items:
+- Specialty sensor array | 5 | 2400.00 | 12000.00
+- Calibration service | 1 | 500.00 | 500.00
+
+Subtotal: 12500.00
+Tax: 1000.00
+Total: 13500.00
+
+Notes: New vendor — first purchase order.

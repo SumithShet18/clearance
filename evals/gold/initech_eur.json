@@ -1,0 +1,14 @@
+{
+  "sample": "invoice_eur_currency.txt",
+  "expected": {
+    "vendor_name": "Initech Services",
+    "invoice_number": "EU-2201",
+    "invoice_date": "2026-03-01",
+    "due_date": "2026-03-31",
+    "currency": "EUR",
+    "subtotal": 3000.0,
+    "tax": 570.0,
+    "total": 3570.0,
+    "line_items": []
+  }
+}
