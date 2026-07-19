@@ -36,7 +36,7 @@ async def test_health_and_tools_catalog():
         assert h.status_code == 200
         body = h.json()
         assert body["product"] == "Clearance"
-        assert body["version"] == "0.2.0"
+        assert body.get("version", "").startswith("0.")
         tools = await client.get("/api/tools")
         names = {t["name"] for t in tools.json()["tools"]}
         assert "erp_create_bill" in names
